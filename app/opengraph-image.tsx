@@ -25,7 +25,7 @@ export default function OpengraphImage() {
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <div style={{ width: 48, height: 4, background: "#0053ce" }} />
           <div style={{ color: "rgba(255,255,255,0.6)", fontSize: 24, letterSpacing: 4, textTransform: "uppercase" }}>
-            New York · Six regions
+            New York · Seven regions
           </div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>

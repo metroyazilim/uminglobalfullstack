@@ -13,7 +13,7 @@ import { breadcrumbJsonLd, collectionPageJsonLd } from "@/components/structuredD
 
 const TITLE = "Offices | UMIN Global";
 const DESCRIPTION =
-  "UMIN Global works from New York, London, Melbourne, Istanbul and Dubai - one senior team, the same reporting standard, local execution in six regions.";
+  "UMIN Global works from New York, London, Melbourne, Istanbul, Dubai and Shanghai - one senior team, one reporting standard, local execution in seven regions.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -48,7 +48,7 @@ export default function OfficesIndexPage() {
           <PageHeroBanner
             title="Offices"
             breadcrumbLabel="Offices"
-            kicker="Five offices, six regions, one operating standard."
+            kicker="Six offices, seven regions, one operating standard."
           />
 
           <Section space="lg">

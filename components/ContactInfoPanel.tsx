@@ -35,7 +35,7 @@ export default function ContactInfoPanel() {
           <dt className="t-eyebrow text-label">Headquarters</dt>
           <dd className="pt-2">
             <p className="t-h3 font-bold text-ink">New York</p>
-            <p className="t-small pt-3 text-body">Offices: New York · London · Melbourne · Istanbul · Dubai</p>
+            <p className="t-small pt-3 text-body">Offices: New York · London · Melbourne · Istanbul · Dubai · Shanghai</p>
           </dd>
         </div>
       </Reveal>

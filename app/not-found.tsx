@@ -30,7 +30,7 @@ const DESTINATIONS: { href: string; label: string; detail: string }[] = [
   { href: "/what-we-do", label: "What We Do", detail: "The five capabilities and how they combine." },
   { href: "/services", label: "All Services", detail: `${SERVICES.length} services with a page each.` },
   { href: "/about", label: "About", detail: "How the company is built and how it works." },
-  { href: "/offices", label: "Offices", detail: "New York, London, Melbourne, Istanbul, Dubai." },
+  { href: "/offices", label: "Offices", detail: "Six cities across four continents." },
   { href: "/insights", label: "Insights", detail: "Notes on building and scaling companies." },
   { href: "/team", label: "Team", detail: "Who you work with." },
   { href: "/contact", label: "Contact", detail: "Email us or send a project brief." },

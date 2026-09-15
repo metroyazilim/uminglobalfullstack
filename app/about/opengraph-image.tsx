@@ -5,5 +5,5 @@ export const contentType = "image/png";
 export const alt = "About UMIN Global - UMIN Global";
 
 export default function OgImage() {
-  return ogCard({ eyebrow: "About", title: "About UMIN Global", subtitle: "New York based, working across six regions." });
+  return ogCard({ eyebrow: "About", title: "About UMIN Global", subtitle: "New York based, working across seven regions." });
 }

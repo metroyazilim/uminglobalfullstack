@@ -5,5 +5,5 @@ export const contentType = "image/png";
 export const alt = "Market entry & expansion - UMIN Global";
 
 export default function OgImage() {
-  return ogCard({ eyebrow: "Global Strategy", title: "Market entry & expansion", subtitle: "Six regions, five offices, one operating standard." });
+  return ogCard({ eyebrow: "Global Strategy", title: "Market entry & expansion", subtitle: "Seven regions, six offices, one operating standard." });
 }

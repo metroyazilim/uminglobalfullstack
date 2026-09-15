@@ -24,7 +24,7 @@ const CAPABILITIES = [
   {
     icon: "globe" as const,
     title: "Global Strategy",
-    description: "Market entry across six regions.",
+    description: "Market entry across seven regions.",
     href: "/global-strategy",
   },
 ];

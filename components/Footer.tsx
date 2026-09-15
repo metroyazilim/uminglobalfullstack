@@ -107,7 +107,12 @@ export default function Footer() {
       <div className="border-t border-white/10 px-6 py-6 md:px-12 lg:px-24">
         <div className="mx-auto flex max-w-[1440px] flex-col items-center gap-3 text-center sm:flex-row sm:justify-between sm:text-left">
           <span className="text-[13px] font-bold uppercase tracking-[2px] text-white">Build · Grow · Scale</span>
-          <p className="text-white/70">© 2026 UMIN Global. All rights reserved.</p>
+          {/* Operating entity and its Australian Business Number. This is the legal footer line
+              every jurisdiction expects to find at the bottom of a company site, and the ABN is
+              what makes the trading entity verifiable. */}
+          <p className="text-white/70">
+            © 2026 UMIN Global · Mevlam Pty Ltd · ABN 29 615 356 539
+          </p>
         </div>
       </div>
     </footer>

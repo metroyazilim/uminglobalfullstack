@@ -1,5 +1,6 @@
-// The team is one person. Earlier revisions of this file split "Anthon Ikram Umit" into three
+// The team: the founder and the CTO. Earlier revisions split "Anthon Ikram Umit" into three
 // separate members with stock portraits - that was wrong, and the stock photos went with it.
+// Every person here has a real photograph and their own page at /team/<slug>.
 export interface TeamMember {
   slug: string;
   name: string;
@@ -34,4 +35,30 @@ export const ANTHON: TeamMember = {
   ],
 };
 
-export const TEAM_MEMBERS: TeamMember[] = [ANTHON];
+export const BERAT: TeamMember = {
+  slug: "muhammet-berat-arslan",
+  name: "Muhammet Berat Arslan",
+  role: "Chief Technology Officer",
+  photo: "/team/muhammet-berat-arslan.png",
+  photoAlt: "Muhammet Berat Arslan, Chief Technology Officer of UMIN Global",
+  bioShort:
+    "Owns technology and digital development: architecture, the AI systems in production, and the standard every build is delivered to.",
+  bio: [
+    "Muhammet Berat Arslan is UMIN Global's Chief Technology Officer and heads technology and digital development. Architecture, the engineering standard and what actually goes to production are his decisions.",
+    "He works on the same principle the company sells: a system is only worth building if someone can state what it costs the business today and what changes once it ships. That applies to a SaaS platform, an AI agent taking real support volume, and the automation nobody sees.",
+    "In practice that means he is in the technical detail on every engagement - the data model, the integrations, the AI workflows and the release process - rather than reviewing it after a delivery team has already decided.",
+  ],
+  worksOn: [
+    { label: "Technology & AI", href: "/technology-ai" },
+    { label: "UMIN AI", href: "/umin-ai" },
+    { label: "Custom Software Development", href: "/services/custom-software-development" },
+    { label: "AI Agents", href: "/services/ai-agents" },
+    { label: "Cloud Solutions", href: "/services/cloud-solutions" },
+  ],
+};
+
+export const TEAM_MEMBERS: TeamMember[] = [ANTHON, BERAT];
+
+export function findTeamMember(slug: string): TeamMember | undefined {
+  return TEAM_MEMBERS.find((member) => member.slug === slug);
+}

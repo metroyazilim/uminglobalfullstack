@@ -1,4 +1,4 @@
-// The five offices, each with its own page at /offices/<slug>. City level only - no street
+// The six offices, each with its own page at /offices/<slug>. City level only - no street
 // addresses anywhere on the site, deliberately.
 export interface Office {
   slug: string;
@@ -55,6 +55,17 @@ export const OFFICES: Office[] = [
     detail: [
       "Istanbul covers the Turkish market and is a frequent starting point for businesses expanding between Europe, Türkiye and the Gulf.",
       "It is also a delivery base: a significant share of engineering and production work across every region is run from here to the same standard as anywhere else in the network.",
+    ],
+  },
+  {
+    slug: "shanghai",
+    city: "Shanghai",
+    country: "China",
+    region: "China & East Asia",
+    summary: "China and East Asia delivery, sourcing and market entry.",
+    detail: [
+      "Shanghai covers China and the wider East Asian market, where entry is decided by things that never appear in a campaign plan: the platform a category actually sells on, the local partner structure, and what can be operated compliantly from outside the country.",
+      "It is also the office closest to manufacturing and supply-chain work, which is why product businesses expanding in either direction - into China or out of it - are run from here alongside the engineering and growth side.",
     ],
   },
   {

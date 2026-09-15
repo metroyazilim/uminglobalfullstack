@@ -21,12 +21,12 @@ const NEXT_STEPS = [
 export const metadata: Metadata = {
   title: "Contact | UMIN Global",
   description:
-    "Talk to UMIN Global about a project, a Growth Partnership or a venture idea. New York headquarters, with offices in London, Melbourne, Istanbul and Dubai.",
+    "Talk to UMIN Global about a project, a Growth Partnership or a venture idea. New York headquarters; offices in London, Melbourne, Istanbul, Dubai and Shanghai.",
   alternates: { canonical: "/contact" },
   openGraph: {
     title: "Contact | UMIN Global",
     description:
-      "Talk to UMIN Global about a project, a Growth Partnership or a venture idea. Offices in New York, London, Melbourne, Istanbul and Dubai.",
+      "Talk to UMIN Global about a project, a Growth Partnership or a venture idea. Offices in New York, London, Melbourne, Istanbul, Dubai and Shanghai.",
     url: "/contact",
   },
 };

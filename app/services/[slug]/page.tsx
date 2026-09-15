@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!service) return {};
 
   const title = `${service.name} Services | UMIN Global`;
-  const pageDescription = description(service.summary, "Delivered by UMIN Global from New York, London, Melbourne, Istanbul and Dubai.");
+  const pageDescription = description(service.summary, "Delivered by UMIN Global from New York, London, Melbourne, Istanbul, Dubai and Shanghai.");
   return {
     title,
     description: pageDescription,

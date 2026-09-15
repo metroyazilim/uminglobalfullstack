@@ -1,6 +1,6 @@
 // Continuously scrolling band of the regions UMIN operates in. Server component: the loop is
 // pure CSS (marquee-track in globals.css), so it never competes with the scroll reveals.
-const REGIONS = ["UK", "Europe", "USA", "Australia", "Türkiye", "Middle East"];
+const REGIONS = ["UK", "Europe", "USA", "Australia", "Türkiye", "Middle East", "China"];
 
 export default function RegionStrip() {
   const items = [...REGIONS, ...REGIONS];

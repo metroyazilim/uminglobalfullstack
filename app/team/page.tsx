@@ -12,7 +12,7 @@ import { breadcrumbJsonLd, collectionPageJsonLd } from "@/components/structuredD
 
 const TITLE = "Our Team | UMIN Global";
 const DESCRIPTION =
-  "UMIN Global is run by its founder, Anthon Ikram Umit - one senior point of contact across technology, growth, AI, ventures and market entry.";
+  "Anthon Ikram Umit, Founder, and Muhammet Berat Arslan, CTO - two senior contacts covering technology, growth, AI, ventures and market entry at UMIN Global.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -47,14 +47,14 @@ export default function TeamPage() {
           <PageHeroBanner
             title="Our Team"
             breadcrumbLabel="Team"
-            kicker="One senior point of contact, on every engagement."
+            kicker="Senior people on the work, on every engagement."
           />
 
           <Section space="lg">
             <SectionHeading
               eyebrow="Who you work with"
               title="No account managers between you and the work"
-              lead="The person who scopes the engagement is the person who runs it and reports on it."
+              lead="The people who scope an engagement are the people who run it and report on it - the founder on the commercial side, the CTO on what gets built."
             />
             <div className="grid grid-cols-1 gap-8 pt-10 sm:grid-cols-2 lg:grid-cols-3">
               {TEAM_MEMBERS.map((member) => (

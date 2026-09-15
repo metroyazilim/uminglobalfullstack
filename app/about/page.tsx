@@ -46,7 +46,7 @@ export default function AboutUsPage() {
           <PageHeroBanner
             title= "About UMIN"
             breadcrumbLabel= "About"
-            kicker= "New York based. Working across six regions."
+            kicker= "New York based. Working across seven regions."
           />
 
           <Section space= "lg">
@@ -58,8 +58,8 @@ export default function AboutUsPage() {
           <Section tone= "gray">
             <SectionHeading
               eyebrow= "Where we work"
-              title= "Six regions, one operating standard"
-              lead= "Offices in New York, London, Melbourne, Istanbul and Dubai. Same team, same reporting, local execution."
+              title= "Seven regions, one operating standard"
+              lead= "Offices in New York, London, Melbourne, Istanbul, Dubai and Shanghai. Same team, same reporting, local execution."
             />
           </Section>
 
@@ -72,8 +72,8 @@ export default function AboutUsPage() {
           <Section tone="gray">
             <SectionHeading
               eyebrow="Who you work with"
-              title="Meet the founders"
-              lead="Every engagement runs through the founder who owns that capability."
+              title="Who you work with"
+              lead="The founder owns the commercial side of every engagement; the CTO owns what gets built. There is no third layer."
             />
             <div className="grid grid-cols-1 gap-5 pt-10 sm:grid-cols-2 lg:grid-cols-3">
               {TEAM_MEMBERS.map((member, index) => (

@@ -17,7 +17,7 @@ import { breadcrumbJsonLd } from "@/components/structuredData";
 const TITLE = "Global Strategy | Market Entry & Expansion | UMIN Global";
 const DESCRIPTION = description(
   "Market entry and expansion across the UK, Europe, USA, Australia, Türkiye and the Gulf,",
-  "run by one senior team from five offices.",
+  "run by one senior team from six offices.",
 );
 
 export const metadata: Metadata = {
@@ -68,7 +68,7 @@ export default function GlobalStrategyPage() {
               <Reveal>
                 <span className="t-eyebrow flex items-center gap-3 text-label">
                   <span aria-hidden="true" className="h-[2px] w-6 bg-accent" />
-                  Six regions
+                  Seven regions
                 </span>
                 <h2 className="t-h2 pt-4 text-ink">Entering a market, not translating a website</h2>
                 <p className="t-lead pt-4 text-body">
@@ -105,7 +105,7 @@ export default function GlobalStrategyPage() {
           <Section tone="gray">
             <SectionHeading
               eyebrow="Where we execute"
-              title="Five offices, one operating standard"
+              title="Six offices, one operating standard"
               lead="Each office has its own page: what it covers and what is run from there."
             />
             <ul className="pt-8">

@@ -124,7 +124,7 @@ export default function BuildWithUminPage() {
                 title= "Working at UMIN"
                 paragraphs={[
  "Small senior teams and short decision chains: the person who designs the solution ships it.",
- "We work across six regions, so written clarity matters more than hours at a desk.",
+ "We work across seven regions, so written clarity matters more than hours at a desk.",
                 ]}
               />
             </div>

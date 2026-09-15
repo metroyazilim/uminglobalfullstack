@@ -14,7 +14,7 @@ const poppins = Poppins({
 const TITLE = "UMIN Global | Higher Thinking. Greater Possibilities.";
 const DESCRIPTION = description(
   "UMIN Global turns ideas into technology, brands and scalable companies -",
-  "software, AI, growth and market entry from New York, London, Melbourne, Istanbul and Dubai.",
+  "software, AI, growth and market entry from New York, London, Melbourne, Istanbul, Dubai and Shanghai.",
 );
 
 export const metadata: Metadata = {
@@ -71,7 +71,10 @@ const ORGANIZATION_JSON_LD = {
   "@type": "Organization",
   "@id": `${SITE_URL}/#organization`,
   name: "UMIN Global",
-  legalName: "UMIN Global",
+  // Trading name vs registered entity: the ABN is what makes the company verifiable, so it is
+  // published as a typed identifier rather than only as footer text.
+  legalName: "Mevlam Pty Ltd",
+  identifier: { "@type": "PropertyValue", name: "ABN", value: "29 615 356 539" },
   url: SITE_URL,
   logo: `${SITE_URL}/icon`,
   image: `${SITE_URL}/opengraph-image`,
@@ -79,7 +82,7 @@ const ORGANIZATION_JSON_LD = {
   description: DESCRIPTION,
   founder: { "@type": "Person", name: "Anthon Ikram Umit", url: `${SITE_URL}/team/anthon-ikram-umit` },
   address: { "@type": "PostalAddress", addressLocality: "New York", addressCountry: "US" },
-  areaServed: ["United Kingdom", "Europe", "United States", "Australia", "Türkiye", "Middle East"],
+  areaServed: ["United Kingdom", "Europe", "United States", "Australia", "Türkiye", "Middle East", "China"],
   knowsAbout: [
     "Custom software development",
     "SaaS platforms",
