@@ -1,0 +1,228 @@
+@import "tailwindcss" source(none);
+@source "../app";
+@source "../components";
+
+@theme {
+  --color-ink: rgb(10, 26, 47);
+  --color-body: rgb(119, 119, 119);
+  --color-brand: rgb(0, 83, 206);
+  --color-brand-hover: rgb(0, 93, 232);
+  --color-nav: rgb(68, 68, 68);
+  --color-label: rgb(172, 180, 190);
+  --color-footer-link: rgb(163, 182, 231);
+  --color-hero-copy: rgb(203, 213, 241);
+  --color-quote-author: rgb(102, 102, 102);
+  --color-accent: rgb(0, 83, 206);
+  --color-section-gray: rgb(245, 247, 250);
+  --color-circle-border: rgb(226, 229, 232);
+  --color-divider: rgb(224, 225, 229);
+  --color-dark-panel: rgb(10, 26, 47);
+  --color-icon-gray: rgb(150, 150, 150);
+  --color-cta-copy: rgb(191, 191, 191);
+  --color-heading-dark: rgb(51, 51, 51);
+  --color-comment-meta: rgb(142, 142, 142);
+  --color-share-badge: rgb(1, 102, 255);
+  --color-facebook-badge: rgb(8, 102, 255);
+  --color-x-badge: rgb(26, 26, 26);
+  --color-copylink-badge: rgb(136, 137, 144);
+  --font-sans: var(--font-poppins), sans-serif;
+  /* One typeface across the site: Poppins. Lead copy uses font-light rather than a
+     second family, so weight carries the contrast instead of a serif. */
+
+  /* Elevation scale - three levels, nothing ad hoc per component. */
+  --shadow-card: 0 0 37px -4px rgba(0, 0, 0, 0.1);
+  --shadow-raised: 0 18px 40px -18px rgba(10, 26, 47, 0.35);
+  --shadow-overlay: -8px 0 24px rgba(0, 0, 0, 0.15);
+
+  /* Corner radius: 8px is the ceiling for cards and panels, 6px for controls.
+     Everything used to be hard 90-degree blocks, which read as unfinished. */
+  --radius-control: 6px;
+  --radius-card: 8px;
+
+  /* One motion duration/easing pair. Reveals and hovers all use it, so nothing
+     overlaps or finishes at a different speed. */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Keyboard focus is visible everywhere, once, from the accent token. */
+*:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+/* ---------------------------------------------------------------------------
+   Type ramp. One place decides every text size, and every step shrinks on
+   small screens - deliberate breakpoint steps, never viewport-scaled text.
+   --------------------------------------------------------------------------- */
+.t-hero {
+  font-size: 30px;
+  line-height: 36px;
+  letter-spacing: -0.5px;
+  font-weight: 800;
+}
+.t-h2 {
+  font-size: 22px;
+  line-height: 29px;
+  letter-spacing: -0.4px;
+  font-weight: 700;
+}
+.t-h3 {
+  font-size: 18px;
+  line-height: 25px;
+  letter-spacing: -0.3px;
+  font-weight: 700;
+}
+.t-lead {
+  font-size: 15px;
+  line-height: 26px;
+  font-weight: 300;
+}
+.t-body {
+  font-size: 14.5px;
+  line-height: 24px;
+}
+.t-small {
+  font-size: 13px;
+  line-height: 21px;
+}
+.t-eyebrow {
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+@media (min-width: 768px) {
+  .t-hero {
+    font-size: 42px;
+    line-height: 48px;
+    letter-spacing: -1px;
+  }
+  .t-h2 {
+    font-size: 26px;
+    line-height: 34px;
+  }
+  .t-h3 {
+    font-size: 19px;
+    line-height: 27px;
+  }
+  .t-lead {
+    font-size: 16px;
+    line-height: 28px;
+  }
+  .t-body {
+    font-size: 15px;
+    line-height: 26px;
+  }
+  .t-eyebrow {
+    font-size: 12px;
+    letter-spacing: 2px;
+  }
+}
+@media (min-width: 1024px) {
+  .t-hero {
+    font-size: 58px;
+    line-height: 64px;
+    letter-spacing: -1.6px;
+  }
+  .t-h2 {
+    font-size: 32px;
+    line-height: 40px;
+    letter-spacing: -1.1px;
+  }
+  .t-h3 {
+    font-size: 21px;
+    line-height: 29px;
+  }
+  .t-lead {
+    font-size: 17px;
+    line-height: 30px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Motion. Exactly two behaviours, one duration, one easing:
+     .enter  - above-the-fold content rises once on load (3 delay steps max)
+     .reveal - below-the-fold sections rise once when scrolled to
+   Previously the hero, banners and panels stacked their own 1s keyframes with
+   delays up to 1.2s on top of scroll reveals, so elements animated over each
+   other and finished at different speeds. One system removes that.
+   --------------------------------------------------------------------------- */
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.enter {
+  animation: enter 0.5s var(--ease-out-soft) backwards;
+}
+.enter-d1 {
+  animation-delay: 0.08s;
+}
+.enter-d2 {
+  animation-delay: 0.16s;
+}
+
+/* RegionStrip.tsx: continuous horizontal scroll of the region list; the track renders the list
+   twice back to back and slides exactly -50% so the loop is seamless. */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.marquee-track {
+  animation: marquee 26s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+}
+
+/* Reveal.tsx: default state is visible; JS only adds .reveal-armed when a section
+   is measured below the fold on mount, so content never gets stuck hidden. Only a
+   vertical rise and a fade exist - horizontal slides inflated scrollWidth on mobile
+   and fought the neighbouring section's motion. */
+.reveal {
+  transition: opacity 0.5s var(--ease-out-soft), transform 0.5s var(--ease-out-soft);
+}
+.reveal-up.reveal-armed {
+  opacity: 0;
+  transform: translate3d(0, 16px, 0);
+}
+.reveal-fade.reveal-armed {
+  opacity: 0;
+}
+.reveal-d1 {
+  transition-delay: 0.08s;
+}
+.reveal-d2 {
+  transition-delay: 0.16s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal.reveal-armed {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
