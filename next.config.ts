@@ -48,18 +48,11 @@ const nextConfig: NextConfig = {
     ];
   },
   async redirects() {
-    // The site was built from a template whose routes were named after its demo pages. Those
-    // paths are dead, so anything still pointing at them - an old link, a crawler's cache -
-    // lands on the equivalent page instead of a 404, and passes its ranking signal along.
+    // Plausible alternative spellings of real sections, so a typed or guessed URL lands on the
+    // page it meant instead of a 404. Nothing here refers to the scaffold this project started
+    // from: those paths were never served on a public domain, so redirecting them would only
+    // publish the fact that they once existed.
     const legacy: Record<string, string> = {
-      "/demo-it-services": "/",
-      "/demo-it-services-about-us": "/about",
-      "/demo-it-services-services": "/what-we-do",
-      "/demo-it-services-services-detail": "/services",
-      "/demo-it-services-blog": "/insights",
-      "/demo-it-services-blog-post": "/insights/from-idea-to-global-business",
-      "/demo-it-services-careers": "/build-with-umin",
-      "/demo-it-services-contact": "/contact",
       "/careers": "/build-with-umin",
       "/blog": "/insights",
       "/our-team": "/team",
