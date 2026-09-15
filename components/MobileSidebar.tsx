@@ -129,10 +129,10 @@ export default function MobileSidebar({ items }: MobileSidebarProps) {
           >
             Start a Project
           </Button>
-          <a href="tel:+61404336767" className="mt-4 block text-[15px] font-bold text-ink">
-            +61 404 336 767
-          </a>
-          <a href="mailto:info@uminglobal.com" className="mt-1 block text-[13px] text-body">
+          <span className="mt-5 block text-[12px] font-semibold uppercase tracking-[0.5px] text-label">
+            Email
+          </span>
+          <a href="mailto:info@uminglobal.com" className="mt-1 block text-[15px] font-bold text-ink">
             info@uminglobal.com
           </a>
         </div>

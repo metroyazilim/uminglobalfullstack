@@ -58,8 +58,9 @@ export default function ContactPage() {
             <ContactInfoPanel />
           </Section>
 
-          <Section space= "lg">
-            <div className= "grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
+          {/* Anchor target for the "Send a project brief" card above and for the footer link. */}
+          <Section id="brief" space="lg">
+            <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
               <SectionHeading
                 eyebrow= "Get in touch"
                 title= "How can we help? "

@@ -87,17 +87,17 @@ export default function Footer() {
           <div className="px-3">
             <h4 className="text-[17.64px] font-semibold leading-[27px] text-white">CONTACT</h4>
             <ul className="mt-2 text-footer-link">
-              <li className="pb-1 font-medium leading-6">
-                <span className="block text-[12.6px] leading-[15.12px]">NEW BUSINESS</span>
-                <a href="tel:+61404336767" className="text-[18px] font-bold text-white">
-                  +61 404 336 767
+              <li className="pb-2 font-medium leading-6">
+                <span className="block text-[12.6px] leading-[15.12px]">EMAIL</span>
+                <a href="mailto:info@uminglobal.com" className="text-[17px] font-bold text-white">
+                  info@uminglobal.com
                 </a>
               </li>
               <li className="font-medium leading-6">
-                <span className="block text-[12.6px] leading-[15.12px]">EMAIL</span>
-                <a href="mailto:info@uminglobal.com" className="text-[15px] font-bold text-white">
-                  info@uminglobal.com
-                </a>
+                <span className="block text-[12.6px] leading-[15.12px]">NEW BUSINESS</span>
+                <Link href="/contact" className="text-[15px] font-bold text-white hover:text-footer-link">
+                  Send a project brief
+                </Link>
               </li>
             </ul>
           </div>

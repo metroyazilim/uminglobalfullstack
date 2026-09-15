@@ -56,7 +56,6 @@ export default async function OfficePage({ params }: { params: Promise<{ slug: s
           name: `UMIN Global ${office.city}`,
           description: office.summary,
           url: `${SITE_URL}/offices/${office.slug}`,
-          telephone: "+61-404-336-767",
           email: "info@uminglobal.com",
           address: {
             "@type": "PostalAddress",

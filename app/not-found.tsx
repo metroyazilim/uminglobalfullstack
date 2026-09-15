@@ -33,7 +33,7 @@ const DESTINATIONS: { href: string; label: string; detail: string }[] = [
   { href: "/offices", label: "Offices", detail: "New York, London, Melbourne, Istanbul, Dubai." },
   { href: "/insights", label: "Insights", detail: "Notes on building and scaling companies." },
   { href: "/team", label: "Team", detail: "Who you work with." },
-  { href: "/contact", label: "Contact", detail: "Phone, email and a project brief form." },
+  { href: "/contact", label: "Contact", detail: "Email us or send a project brief." },
 ];
 
 export default function NotFound() {

@@ -39,7 +39,6 @@ export default function AnthonPage() {
           image: `${SITE_URL}${ANTHON.photo}`,
           worksFor: { "@type": "Organization", name: "UMIN Global", url: SITE_URL },
           email: "info@uminglobal.com",
-          telephone: "+61-404-336-767",
         }}
       />
       <JsonLd data={BREADCRUMB_JSON_LD} />

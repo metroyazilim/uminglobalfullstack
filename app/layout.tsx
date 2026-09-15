@@ -38,7 +38,8 @@ export const metadata: Metadata = {
   // Read by Safari and by Windows tiles; the rest of the icon set comes from app/icon.tsx and
   // app/apple-icon.tsx, which Next links automatically.
   appleWebApp: { capable: false, title: "UMIN Global" },
-  formatDetection: { telephone: true, address: false, email: true },
+  // No phone number is published anywhere on the site, so there is nothing for iOS to linkify.
+  formatDetection: { telephone: false, address: false, email: true },
   robots: IS_PRODUCTION_DEPLOYMENT
     ? {
         index: true,
@@ -91,7 +92,6 @@ const ORGANIZATION_JSON_LD = {
     {
       "@type": "ContactPoint",
       contactType: "sales",
-      telephone: "+61-404-336-767",
       email: "info@uminglobal.com",
       availableLanguage: ["English", "Turkish"],
     },

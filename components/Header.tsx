@@ -3,7 +3,7 @@ import Button from "./ui/Button";
 import NavDropdown from "./NavDropdown";
 import MobileSidebar from "./MobileSidebar";
 
-// Fixed top navigation bar (wordmark, primary menu, Start a Project CTA + phone) used on every
+// Fixed top navigation bar (wordmark, primary menu, Start a Project CTA + email) used on every
 // page. At `lg` and up the links sit on one centred row; below that they move into
 // MobileSidebar, because seven top-level entries plus seven capability links do not fit a row.
 // The five capability pages group under one "What We Do" dropdown rather than sitting as five
@@ -63,8 +63,11 @@ export default function Header() {
           </nav>
 
           <div className="hidden shrink-0 items-center gap-6 lg:flex">
-            <a href="tel:+61404336767" className="text-[15px] font-bold text-brand transition-colors duration-200 hover:text-ink">
-              +61 404 336 767
+            <a
+              href="mailto:info@uminglobal.com"
+              className="text-[15px] font-bold text-brand transition-colors duration-200 hover:text-ink"
+            >
+              info@uminglobal.com
             </a>
             <Button href="/contact" withArrow={false} className="text-[13px] uppercase tracking-[0.5px]">
               Start a Project
