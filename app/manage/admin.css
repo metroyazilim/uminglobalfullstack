@@ -1,0 +1,45 @@
+/* Admin-only design tokens, loaded only by app/manage/layout.tsx — never
+   imported by the public site, and it never reads the public
+   app/globals.css tokens. `@theme` registers real Tailwind color utilities
+   (bg-brand-*, text-brand-*, border-brand-*, divide-brand-*, with opacity
+   modifiers like `border-brand-danger/30` working automatically), so every
+   admin component can read them through components/admin/ui.ts instead of
+   a raw hex value — same convention as the anton/kadik admin panel. Colors
+   are UMIN Global's own brand blue (#0053ce, from app/globals.css's
+   --color-brand), not copied from kadik. */
+@import "tailwindcss" source(none);
+@source "../../app/manage";
+@source "../../components/admin";
+
+@theme {
+  --color-brand-page: #f5f7fa;
+  --color-brand-surface: #ffffff;
+  --color-brand-muted-surface: #eef1f6;
+  --color-brand-border: #e1e6ee;
+  --color-brand-text: #0a1a2f;
+  --color-brand-muted: #6b7686;
+  --color-brand-primary: #0053ce;
+  --color-brand-primary-dark: #003f9c;
+  --color-brand-success: #157a45;
+  --color-brand-warning: #b5730a;
+  --color-brand-danger: #c72e3e;
+  --color-brand-invert: #0a1a2f;
+  --color-brand-invert-soft: #16304f;
+  --color-brand-on-invert: #ffffff;
+  --color-brand-on-invert-muted: #a9b8d6;
+  --color-brand-accent: #0053ce;
+}
+
+.admin-root {
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+
+  /* Admin typography is deliberately its own — the public site's
+     Poppins (app/globals.css) is a marketing/editorial choice; the panel
+     reads operational data all day and gets Inter instead (loaded by
+     app/manage/layout.tsx as --font-admin-inter). */
+  font-family: var(--font-admin-inter), ui-sans-serif, system-ui, sans-serif;
+  background: var(--color-brand-page);
+  color: var(--color-brand-text);
+}

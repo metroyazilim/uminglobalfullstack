@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { applyPageSeoOverride } from "@/lib/seo-overrides";
+import { PageContentSlot } from "@/components/PageContentBlocks";
 import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -23,13 +25,17 @@ const DESCRIPTION = description(
   "implemented where they create measurable commercial value.",
 );
 
-export const metadata: Metadata = {
+const BASE_METADATA: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: "/umin-ai" },
   openGraph: { title: TITLE, description: DESCRIPTION, url: "/umin-ai" },
   twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION },
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  return applyPageSeoOverride(BASE_METADATA, "umin-ai");
+}
 
 const AI_CAPABILITIES = SERVICES_BY_CATEGORY("ai");
 
@@ -94,6 +100,7 @@ export default function UminAiPage() {
       <Header />
       <div className= "pt-[72px] lg:pt-[104px]">
         <main>
+          <PageContentSlot pageKey="umin-ai" />
           <PageHeroBanner
             title= "UMIN AI"
             breadcrumbLabel= "UMIN AI"

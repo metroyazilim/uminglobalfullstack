@@ -7,6 +7,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Button from "./ui/Button";
+import Logo from "./Logo";
 
 interface NavLink {
   label: string;
@@ -70,9 +71,7 @@ export default function MobileSidebar({ items }: MobileSidebarProps) {
         className="fixed inset-y-0 right-0 z-[70] flex w-[320px] max-w-[88vw] flex-col bg-white shadow-overlay transition-transform duration-300"
       >
         <div className="flex items-center justify-between px-6 py-5">
-          <span className="text-[18px] font-bold tracking-tight text-ink">
-            UMIN <span className="font-medium text-body">GLOBAL</span>
-          </span>
+          <Logo height={56} className="h-[24px] w-auto" />
           <button
             type="button"
             aria-label="Close menu"
@@ -92,12 +91,16 @@ export default function MobileSidebar({ items }: MobileSidebarProps) {
                 <li key={item.label} className="py-3">
                   <span className="t-eyebrow text-label">{item.label}</span>
                   <ul className="flex flex-col pt-1">
-                    {item.dropdown.map((sub) => (
+                    {item.dropdown.map((sub, index) => (
                       <li key={sub.href}>
                         <Link
                           href={sub.href}
                           onClick={() => setOpen(false)}
-                          className="block py-2 text-[14px] font-semibold uppercase tracking-[0.5px] text-nav transition-colors duration-200 hover:text-brand"
+                          className={
+                            index === 0
+                              ? "block py-2 text-[14px] font-semibold uppercase tracking-[0.5px] text-nav transition-colors duration-200 hover:text-brand"
+                              : "block py-1.5 text-[12px] font-medium uppercase tracking-[0.5px] text-body transition-colors duration-200 hover:text-brand"
+                          }
                         >
                           {sub.label}
                         </Link>

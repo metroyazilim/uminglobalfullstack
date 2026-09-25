@@ -28,3 +28,4 @@ yarn-error.log*
 
 # Local SMTP test harness output
 /tmp-smtp
+backups/

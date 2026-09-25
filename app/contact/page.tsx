@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { applyPageSeoOverride } from "@/lib/seo-overrides";
+import { PageContentSlot } from "@/components/PageContentBlocks";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeroBanner from "@/components/PageHeroBanner";
@@ -18,7 +20,7 @@ const NEXT_STEPS = [
   ["03", "Written scope and price", "Model, milestones and what each side owns, in writing."],
 ];
 
-export const metadata: Metadata = {
+const BASE_METADATA: Metadata = {
   title: "Contact | UMIN Global",
   description:
     "Talk to UMIN Global about a project, a Growth Partnership or a venture idea. New York headquarters; offices in London, Melbourne, Istanbul, Dubai and Shanghai.",
@@ -30,6 +32,10 @@ export const metadata: Metadata = {
     url: "/contact",
   },
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  return applyPageSeoOverride(BASE_METADATA, "contact");
+}
 
 const PAGE_JSON_LD = webPageJsonLd({
   path: "/contact",
@@ -48,6 +54,7 @@ export default function ContactPage() {
       <Header />
       <div className= "pt-[72px] lg:pt-[104px]">
         <main>
+          <PageContentSlot pageKey="contact" />
           <PageHeroBanner
             title= "Contact"
             breadcrumbLabel= "Contact"

@@ -12,25 +12,26 @@ import BlogPostAuthor from "@/components/BlogPostAuthor";
 import Section from "@/components/ui/Section";
 import Reveal from "@/components/Reveal";
 import JsonLd from "@/components/JsonLd";
+import { RichText } from "@/components/RichText";
 import { SITE_URL, absoluteUrl } from "@/components/seo";
 import { breadcrumbJsonLd } from "@/components/structuredData";
-import { INSIGHTS, findInsight, type Block } from "@/components/insights";
+import type { Block } from "@/components/insights";
+import { getInsight, getInsightSlugs } from "@/lib/content/insights";
 
-// One route for every article; the content comes from components/insights.ts. Each article had
-// its own page file before, which is how the site ended up with four cards pointing at the one
-// page that existed.
-
-export function generateStaticParams() {
-  return INSIGHTS.map((post) => ({ slug: post.slug }));
+// One route for every article; the content is managed through the admin with bundled content as
+// a fallback when the database is unavailable.
+export async function generateStaticParams() {
+  const slugs = await getInsightSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
-// The catalogue is fixed at build time, so an unknown slug is a 404 immediately rather than a
-// render on demand that would then be cached as a real page.
-export const dynamicParams = false;
+// Newly published articles can render on demand without waiting for a rebuild.
+export const dynamicParams = true;
+export const revalidate = 300;
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const post = findInsight(slug);
+  const post = await getInsight(slug);
   if (!post) return {};
 
   const url = `/insights/${post.slug}`;
@@ -57,9 +58,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 function BodyBlock({ block }: { block: Block }) {
   switch (block.kind) {
     case "lead":
-      return <p className="t-lead pt-8 text-ink">{block.text}</p>;
+      return <RichText html={block.text} className="t-lead pt-8 text-ink" />;
     case "p":
-      return <p className="t-body pt-5 text-body">{block.text}</p>;
+      return <RichText html={block.text} className="t-body pt-5 text-body" />;
     case "h2":
       return <h2 className="t-h3 pt-8 text-ink">{block.text}</h2>;
     case "list":
@@ -75,14 +76,14 @@ function BodyBlock({ block }: { block: Block }) {
       );
     case "callout":
       return (
-        <p className="t-lead mt-8 border-l-2 border-accent pl-6 font-medium text-ink">{block.text}</p>
+        <RichText html={block.text} className="t-lead mt-8 border-l-2 border-accent pl-6 font-medium text-ink" />
       );
   }
 }
 
 export default async function InsightArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const post = findInsight(slug);
+  const post = await getInsight(slug);
   if (!post) notFound();
 
   const url = absoluteUrl(`/insights/${post.slug}`);

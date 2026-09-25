@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { applyPageSeoOverride } from "@/lib/seo-overrides";
+import { PageContentSlot } from "@/components/PageContentBlocks";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -20,13 +22,17 @@ const DESCRIPTION = description(
   "run by one senior team from six offices.",
 );
 
-export const metadata: Metadata = {
+const BASE_METADATA: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: "/global-strategy" },
   openGraph: { title: TITLE, description: DESCRIPTION, url: "/global-strategy" },
   twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION },
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  return applyPageSeoOverride(BASE_METADATA, "global-strategy");
+}
 
 const DECISIONS = [
   ["Demand", "Whether the demand you have at home exists in the target market at all."],
@@ -57,6 +63,7 @@ export default function GlobalStrategyPage() {
       <Header />
       <div className="pt-[72px] lg:pt-[104px]">
         <main>
+          <PageContentSlot pageKey="global-strategy" />
           <PageHeroBanner
             title="Global Strategy"
             breadcrumbLabel="Global Strategy"

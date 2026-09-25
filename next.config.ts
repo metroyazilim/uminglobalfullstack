@@ -19,6 +19,9 @@ const SECURITY_HEADERS = [
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // Docker/Dokploy target: emit a self-contained server bundle (.next/standalone) so the runtime
+  // image does not need the full node_modules tree.
+  output: "standalone",
   // Photography is served from Unsplash and goes through next/image, so the optimizer has to be
   // allowed to fetch that host. Nothing else is permitted: an open image proxy would let anyone
   // serve arbitrary bytes from this domain. AVIF first, WebP for the browsers without it.

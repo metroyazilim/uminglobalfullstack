@@ -8,22 +8,22 @@ import CtaBanner from "@/components/CtaBanner";
 import Section from "@/components/ui/Section";
 import Button from "@/components/ui/Button";
 import Reveal from "@/components/Reveal";
+import { RichText } from "@/components/RichText";
 import JsonLd from "@/components/JsonLd";
-import { OFFICES } from "@/components/offices";
+import { getOffice, getOffices, getOfficeSlugs } from "@/lib/content/offices";
 import { SITE_URL, description } from "@/components/seo";
 
-// The catalogue is fixed at build time, so every valid URL is prerendered. Refusing unknown
-// params means a made-up slug returns the 404 page immediately instead of being rendered on
-// demand and cached as a real page.
-export const dynamicParams = false;
+export const revalidate = 300;
+export const dynamicParams = true;
 
-export function generateStaticParams() {
-  return OFFICES.map((office) => ({ slug: office.slug }));
+export async function generateStaticParams() {
+  const slugs = await getOfficeSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const office = OFFICES.find((entry) => entry.slug === slug);
+  const office = await getOffice(slug);
   if (!office) return {};
 
   const title = `UMIN Global ${office.city} | ${office.region} Office`;
@@ -42,10 +42,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function OfficePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const office = OFFICES.find((entry) => entry.slug === slug);
+  const offices = await getOffices();
+  const office = offices.find((entry) => entry.slug === slug);
   if (!office) notFound();
 
-  const others = OFFICES.filter((entry) => entry.slug !== office.slug);
+  const others = offices.filter((entry) => entry.slug !== office.slug);
 
   return (
     <>
@@ -96,9 +97,7 @@ export default async function OfficePage({ params }: { params: Promise<{ slug: s
                 </span>
                 <h2 className="t-h2 pt-4 text-ink">What runs from {office.city}</h2>
                 {office.detail.map((paragraph) => (
-                  <p key={paragraph} className="t-lead pt-4 text-body">
-                    {paragraph}
-                  </p>
+                  <RichText key={paragraph} html={paragraph} className="t-lead pt-4 text-body" />
                 ))}
                 <div className="flex flex-col gap-3 pt-8 sm:flex-row">
                   <Button href="/contact">Talk to {office.city}</Button>

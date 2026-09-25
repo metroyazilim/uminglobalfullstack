@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { applyPageSeoOverride } from "@/lib/seo-overrides";
+import { PageContentSlot } from "@/components/PageContentBlocks";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeroBanner from "@/components/PageHeroBanner";
@@ -16,13 +18,17 @@ const TITLE = "Ventures | Co-Building Companies With Founders | UMIN Global";
 const DESCRIPTION =
   "UMIN Global co-builds new companies with founders and operators, contributing product, brand, growth and AI capability for equity or an agreed revenue share.";
 
-export const metadata: Metadata = {
+const BASE_METADATA: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: "/ventures" },
   openGraph: { title: TITLE, description: DESCRIPTION, url: "/ventures" },
   twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION },
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  return applyPageSeoOverride(BASE_METADATA, "ventures");
+}
 
 const WHAT_WE_CONTRIBUTE = [
   ["Product", "Architecture, build and the first shipped version - not a prototype."],
@@ -53,6 +59,7 @@ export default function VenturesPage() {
       <Header />
       <div className="pt-[72px] lg:pt-[104px]">
         <main>
+          <PageContentSlot pageKey="ventures" />
           <PageHeroBanner
             title="Ventures"
             breadcrumbLabel="Ventures"

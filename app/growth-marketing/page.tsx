@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { applyPageSeoOverride } from "@/lib/seo-overrides";
+import { PageContentSlot } from "@/components/PageContentBlocks";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeroBanner from "@/components/PageHeroBanner";
@@ -22,13 +24,17 @@ const DESCRIPTION = description(
   "as a Growth Partnership or a Complete Package you own.",
 );
 
-export const metadata: Metadata = {
+const BASE_METADATA: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: "/growth-marketing" },
   openGraph: { title: TITLE, description: DESCRIPTION, url: "/growth-marketing" },
   twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION },
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  return applyPageSeoOverride(BASE_METADATA, "growth-marketing");
+}
 
 const GROWTH = SERVICES_BY_CATEGORY("growth");
 
@@ -84,6 +90,7 @@ export default function GrowthPage() {
       <Header />
       <div className= "pt-[72px] lg:pt-[104px]">
         <main>
+          <PageContentSlot pageKey="growth-marketing" />
           <PageHeroBanner
             title= "Growth & Marketing"
             breadcrumbLabel= "Growth"

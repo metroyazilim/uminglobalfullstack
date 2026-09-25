@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { TEAM_MEMBERS } from "./teamMembers";
 import { OFFICES } from "./offices";
+import Logo from "./Logo";
 
 // Site footer, used on every page. Every entry in every column links to a page that exists in
 // its own right: the five capabilities, the company pages, the team, and one page per office.
@@ -25,9 +26,7 @@ export default function Footer() {
     <footer className="relative bg-brand text-[12.6px]">
       <div className="mx-auto max-w-[1440px] px-6 pb-4 pt-10 md:px-12 lg:px-24">
         <div className="border-b border-white/10 pb-10">
-          <span className="block text-[22px] font-bold tracking-tight text-white">
-            UMIN <span className="font-medium text-white/70">GLOBAL</span>
-          </span>
+          <Logo variant="light" height={72} className="h-[34px] w-auto" />
           <p className="mt-2 text-[15px] font-light text-footer-link">Higher Thinking. Greater Possibilities.</p>
         </div>
 

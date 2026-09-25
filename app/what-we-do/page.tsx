@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { applyPageSeoOverride } from "@/lib/seo-overrides";
+import { PageContentSlot } from "@/components/PageContentBlocks";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeroBanner from "@/components/PageHeroBanner";
@@ -19,13 +21,17 @@ const DESCRIPTION = description(
   "Ventures and Global Strategy - 42 services, one page each.",
 );
 
-export const metadata: Metadata = {
+const BASE_METADATA: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: "/what-we-do" },
   openGraph: { title: TITLE, description: DESCRIPTION, url: "/what-we-do" },
   twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION },
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  return applyPageSeoOverride(BASE_METADATA, "what-we-do");
+}
 
 const TECHNOLOGY = SERVICES_BY_CATEGORY("technology");
 const GROWTH = SERVICES_BY_CATEGORY("growth");
@@ -55,6 +61,7 @@ export default function WhatWeDoPage() {
       <Header />
       <div className="pt-[72px] lg:pt-[104px]">
         <main>
+          <PageContentSlot pageKey="what-we-do" />
           <PageHeroBanner
             title="What we do"
             breadcrumbLabel="What we do"

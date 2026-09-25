@@ -1,0 +1,70 @@
+# UMIN Global — production stack for Dokploy (Docker Compose deployment).
+#
+# Dokploy builds this compose file from the repository, injects the variables
+# defined in its Environment tab, and routes its own Traefik proxy to the `web`
+# service. No host ports are published on purpose: Dokploy attaches the domain
+# to the service and terminates TLS itself. To run the stack outside Dokploy,
+# uncomment the `ports` block on `web`.
+#
+# Local dev Postgres previously lived in this file; it now models production.
+# Start a dev database with: `docker compose -f docker-compose.dev.yml up -d`.
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-umin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-umin_global}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      # Dumps placed here are importable with:
+      #   docker compose exec -T db pg_restore -U umin -d umin_global --clean --if-exists < backups/<file>.dump
+      - ./backups:/backups:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-umin} -d ${POSTGRES_DB:-umin_global}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Baked into the client bundle at build time — must be the public origin.
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:?set NEXT_PUBLIC_SITE_URL}
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-umin}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-umin_global}?schema=public}
+      AUTH_SECRET: ${AUTH_SECRET:?set AUTH_SECRET}
+      # Seed credentials are only read by `npm run db:seed`, never at runtime.
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      # Contact form mail transport.
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-465}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      CONTACT_TO: ${CONTACT_TO:-}
+      # Cloudflare R2 media storage. Without these, uploads are memory-only and
+      # disappear on restart — always set them in production.
+      R2_ACCOUNT_ID: ${R2_ACCOUNT_ID:-}
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID:-}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY:-}
+      R2_BUCKET: ${R2_BUCKET:-}
+      R2_PUBLIC_BASE_URL: ${R2_PUBLIC_BASE_URL:-}
+    expose:
+      - "3000"
+    # ports:
+    #   - "3200:3000"
+
+volumes:
+  db-data:

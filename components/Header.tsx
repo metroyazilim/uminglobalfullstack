@@ -2,6 +2,7 @@ import Link from "next/link";
 import Button from "./ui/Button";
 import NavDropdown from "./NavDropdown";
 import MobileSidebar from "./MobileSidebar";
+import Logo from "./Logo";
 
 // Fixed top navigation bar (wordmark, primary menu, Start a Project CTA + email) used on every
 // page. At `lg` and up the links sit on one centred row; below that they move into
@@ -37,10 +38,8 @@ export default function Header() {
     <div className="fixed inset-x-0 top-0 z-50 flex flex-col border-b border-divider bg-white shadow-card">
       <div className="relative mx-auto w-full max-w-[1320px] px-6 md:px-10 lg:px-16">
         <div className="flex h-[72px] items-center justify-between gap-6 lg:h-[104px] lg:justify-start">
-          <Link href="/" className="block shrink-0" aria-label="UMIN Global">
-            <span className="text-[18px] font-bold tracking-tight text-ink transition-opacity duration-200 hover:opacity-70 lg:text-[26px]">
-              UMIN <span className="font-medium text-body">GLOBAL</span>
-            </span>
+          <Link href="/" className="block shrink-0 transition-opacity duration-200 hover:opacity-70" aria-label="UMIN Global">
+            <Logo height={64} priority className="h-[26px] w-auto lg:h-[34px]" />
           </Link>
 
           <nav className="hidden min-w-0 flex-1 lg:block lg:flex-none">

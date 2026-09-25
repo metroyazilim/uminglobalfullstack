@@ -7,23 +7,20 @@ import CtaBanner from "@/components/CtaBanner";
 import TeamMemberProfile from "@/components/TeamMemberProfile";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbJsonLd } from "@/components/structuredData";
-import { TEAM_MEMBERS, findTeamMember } from "@/components/teamMembers";
+import { getTeamMember, getTeamSlugs } from "@/lib/content/team";
 import { SITE_URL, absoluteUrl } from "@/components/seo";
 
-// One route per person, generated from components/teamMembers.ts. It replaced a hand-written
-// page for the founder: with a second person on the team that file would have had to be copied,
-// and the copy is where the profile, the metadata and the Person schema drift apart.
+export const revalidate = 300;
+export const dynamicParams = true;
 
-export function generateStaticParams() {
-  return TEAM_MEMBERS.map((member) => ({ slug: member.slug }));
+export async function generateStaticParams() {
+  const slugs = await getTeamSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
-
-// The team is a fixed list, so an unknown slug is a 404 rather than an on-demand render.
-export const dynamicParams = false;
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const member = findTeamMember(slug);
+  const member = await getTeamMember(slug);
   if (!member) return {};
 
   // <title> is clamped at ~60 characters in the SERP, and "Chief Technology Officer" alone
@@ -43,7 +40,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function TeamMemberPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const member = findTeamMember(slug);
+  const member = await getTeamMember(slug);
   if (!member) notFound();
 
   const url = absoluteUrl(`/team/${member.slug}`);

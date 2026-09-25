@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { applyPageSeoOverride } from "@/lib/seo-overrides";
+import { PageContentSlot } from "@/components/PageContentBlocks";
 import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -22,13 +24,17 @@ const DESCRIPTION = description(
   "built around the workflow and what it costs your business today.",
 );
 
-export const metadata: Metadata = {
+const BASE_METADATA: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: "/technology-ai" },
   openGraph: { title: TITLE, description: DESCRIPTION, url: "/technology-ai" },
   twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION },
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  return applyPageSeoOverride(BASE_METADATA, "technology-ai");
+}
 
 const TECHNOLOGY = SERVICES_BY_CATEGORY("technology");
 
@@ -84,6 +90,7 @@ export default function TechnologyAiPage() {
       <Header />
       <div className="pt-[72px] lg:pt-[104px]">
         <main>
+          <PageContentSlot pageKey="technology-ai" />
           <PageHeroBanner
             title="Technology & AI"
             breadcrumbLabel="Technology & AI"

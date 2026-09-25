@@ -3,6 +3,7 @@ import { Poppins } from "next/font/google";
 import JsonLd from "@/components/JsonLd";
 import ScrollReset from "@/components/ScrollReset";
 import { SITE_URL, IS_PRODUCTION_DEPLOYMENT, description } from "@/components/seo";
+import { getSiteSettings } from "@/lib/content/site-settings";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -64,59 +65,68 @@ export const metadata: Metadata = {
   },
 };
 
-// Organization and WebSite structured data. No street address - see ContactInfoPanel.tsx for
-// why - so `address` stays limited to the locality, not a suite number nobody has confirmed.
-const ORGANIZATION_JSON_LD = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "@id": `${SITE_URL}/#organization`,
-  name: "UMIN Global",
-  // Trading name vs registered entity: the ABN is what makes the company verifiable, so it is
-  // published as a typed identifier rather than only as footer text.
-  legalName: "Mevlam Pty Ltd",
-  identifier: { "@type": "PropertyValue", name: "ABN", value: "29 615 356 539" },
-  url: SITE_URL,
-  logo: `${SITE_URL}/icon`,
-  image: `${SITE_URL}/opengraph-image`,
-  slogan: "Higher Thinking. Greater Possibilities.",
-  description: DESCRIPTION,
-  founder: { "@type": "Person", name: "Anthon Ikram Umit", url: `${SITE_URL}/team/anthon-ikram-umit` },
-  address: { "@type": "PostalAddress", addressLocality: "New York", addressCountry: "US" },
-  areaServed: ["United Kingdom", "Europe", "United States", "Australia", "Türkiye", "Middle East", "China"],
-  knowsAbout: [
-    "Custom software development",
-    "SaaS platforms",
-    "Applied artificial intelligence",
-    "Growth marketing",
-    "SEO",
-    "Market entry and international expansion",
-  ],
-  contactPoint: [
-    {
-      "@type": "ContactPoint",
-      contactType: "sales",
-      email: "info@uminglobal.com",
-      availableLanguage: ["English", "Turkish"],
-    },
-  ],
-};
-
-const WEBSITE_JSON_LD = {
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "@id": `${SITE_URL}/#website`,
-  url: SITE_URL,
-  name: "UMIN Global",
-  description: DESCRIPTION,
-  inLanguage: "en",
-  publisher: { "@id": `${SITE_URL}/#organization` },
-};
-
 // Runs before first paint, which is the only point at which the browser's scroll restoration can
 // still be suppressed. See components/ScrollReset.tsx for the whole mechanism.
 const SUPPRESS_SCROLL_RESTORE = `try{if('scrollRestoration' in history&&performance.getEntriesByType('navigation')[0]&&performance.getEntriesByType('navigation')[0].type==='reload'){history.scrollRestoration='manual'}}catch(e){}`;
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const settings = await getSiteSettings();
+  const socialUrls = Object.values(settings.socials).filter((url) => url.length > 0);
+  // Organization and WebSite structured data. No street address - see ContactInfoPanel.tsx for
+  // why - so `address` stays limited to the locality, not a suite number nobody has confirmed.
+  const organizationJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": `${SITE_URL}/#organization`,
+    name: settings.organizationName,
+    alternateName: settings.alternateName,
+    // Trading name vs registered entity: the ABN is what makes the company verifiable, so it is
+    // published as a typed identifier rather than only as footer text.
+    legalName: settings.legalName,
+    identifier: { "@type": "PropertyValue", name: "ABN", value: "29 615 356 539" },
+    url: SITE_URL,
+    logo: `${SITE_URL}/icon`,
+    image: `${SITE_URL}/opengraph-image`,
+    slogan: settings.slogan,
+    description: settings.description,
+    ...(settings.foundingDate ? { foundingDate: settings.foundingDate } : {}),
+    founder: { "@type": "Person", name: "Anthon Ikram Umit", url: `${SITE_URL}/team/anthon-ikram-umit` },
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: settings.locality,
+      addressCountry: settings.countryCode,
+    },
+    areaServed: ["United Kingdom", "Europe", "United States", "Australia", "Türkiye", "Middle East", "China"],
+    knowsAbout: [
+      "Custom software development",
+      "SaaS platforms",
+      "Applied artificial intelligence",
+      "Growth marketing",
+      "SEO",
+      "Market entry and international expansion",
+    ],
+    contactPoint: [
+      {
+        "@type": "ContactPoint",
+        contactType: "sales",
+        email: settings.email,
+        ...(settings.phone ? { telephone: settings.phone } : {}),
+        availableLanguage: ["English", "Turkish"],
+      },
+    ],
+    ...(socialUrls.length > 0 ? { sameAs: socialUrls } : {}),
+  };
+
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": `${SITE_URL}/#website`,
+    url: SITE_URL,
+    name: settings.organizationName,
+    description: settings.description,
+    inLanguage: "en",
+    publisher: { "@id": `${SITE_URL}/#organization` },
+  };
   return (
     <html lang="en" className={poppins.variable}>
       <head>
@@ -127,8 +137,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: SUPPRESS_SCROLL_RESTORE }} />
       </head>
       <body className="bg-white font-sans text-body antialiased">
-        <JsonLd data={ORGANIZATION_JSON_LD} />
-        <JsonLd data={WEBSITE_JSON_LD} />
+        <JsonLd data={organizationJsonLd} />
+        <JsonLd data={websiteJsonLd} />
         <ScrollReset />
         {children}
       </body>

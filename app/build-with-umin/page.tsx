@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { applyPageSeoOverride } from "@/lib/seo-overrides";
+import { PageContentSlot } from "@/components/PageContentBlocks";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeroBanner from "@/components/PageHeroBanner";
@@ -13,7 +15,7 @@ import Button from "@/components/ui/Button";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbJsonLd, webPageJsonLd } from "@/components/structuredData";
 
-export const metadata: Metadata = {
+const BASE_METADATA: Metadata = {
   title: "Build With UMIN | UMIN Global",
   description:
     "Your idea could become the next business. UMIN co-builds ventures with founders and operators - and is hiring in New York and remotely.",
@@ -24,6 +26,10 @@ export const metadata: Metadata = {
     url: "/build-with-umin",
   },
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  return applyPageSeoOverride(BASE_METADATA, "build-with-umin");
+}
 
 const CRITERIA = [
   ["A real problem", "Something a business already pays to work around."],
@@ -53,6 +59,7 @@ export default function BuildWithUminPage() {
       <Header />
       <div className= "pt-[72px] lg:pt-[104px]">
         <main>
+          <PageContentSlot pageKey="build-with-umin" />
           <PageHeroBanner
             title= "Build with UMIN"
             breadcrumbLabel= "Build with UMIN"

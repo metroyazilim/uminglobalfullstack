@@ -1,0 +1,273 @@
+// UMIN Global admin panel schema. Standards ported 1:1 from the KADİK admin
+// panel (anton/kadik): AdminUser/AuditLog/PasswordResetToken shape, roles,
+// tokenVersion session invalidation, MediaAsset checksum/dimension tracking.
+// Content models (TeamMember/Office/Post) are new — sized to this site's own
+// content, not copied from KADİK's bilingual content-entity engine.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  AUTHOR
+}
+
+model AdminUser {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  passwordHash String
+  name         String
+  role         AdminRole  @default(ADMIN)
+  tokenVersion Int        @default(0)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  audits       AuditLog[]
+}
+
+/// Single-use, short-lived password reset grant. Only the SHA-256 hash of
+/// the emailed token is stored, so a database read never yields a usable
+/// reset link. `usedAt` makes redemption idempotent-safe.
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model AuditLog {
+  id        String     @id @default(cuid())
+  action    String
+  entity    String
+  entityId  String?
+  userId    String?
+  metadata  Json?
+  createdAt DateTime   @default(now())
+  user      AdminUser? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([userId, createdAt])
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+/// Mirrors components/teamMembers.ts's `TeamMember` shape exactly (bio and
+/// worksOn stored as JSON arrays with the same field names) so a future
+/// integration can read rows straight into that interface without a
+/// transform layer. Not read by the public site today — see AGENTS note in
+/// app/manage/(panel)/team/actions.ts.
+model TeamMember {
+  id        String        @id @default(cuid())
+  slug      String        @unique
+  name      String
+  role      String
+  photo     String
+  photoAlt  String
+  bioShort  String
+  bio       Json
+  worksOn   Json
+  sortOrder Int           @default(0)
+  status    ContentStatus @default(DRAFT)
+  version   Int           @default(0)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([status, sortOrder])
+}
+
+/// Mirrors components/offices.ts's `Office` shape exactly (detail stored as
+/// a 2-entry JSON string array).
+model Office {
+  id           String        @id @default(cuid())
+  slug         String        @unique
+  city         String
+  country      String
+  region       String
+  summary      String
+  detail       Json
+  headquarters Boolean       @default(false)
+  sortOrder    Int           @default(0)
+  status       ContentStatus @default(DRAFT)
+  version      Int           @default(0)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([status, sortOrder])
+}
+
+/// Mirrors components/insights.ts's `InsightPost` shape exactly (body,
+/// keywords and related stored as JSON matching the `Block[]` union and
+/// `{label, href}[]` shape from that file).
+model Post {
+  id             String        @id @default(cuid())
+  slug           String        @unique
+  title          String
+  metaTitle      String
+  description    String
+  excerpt        String
+  date           DateTime
+  dateDisplay    String
+  updated        String?
+  readingMinutes Int
+  topic          String
+  keywords       Json
+  image          String
+  imageAlt       String
+  ogTitle        String
+  ogSubtitle     String
+  body           Json
+  related        Json
+  status         ContentStatus @default(DRAFT)
+  version        Int           @default(0)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([status, date])
+}
+
+/// Contact form submissions. `status` transitions are guarded by `version`
+/// (optimistic concurrency) — same pattern as KADİK's `Message` model.
+/// Removal is soft-only (ARCHIVED); there is no hard delete path.
+enum MessageStatus {
+  UNREAD
+  READ
+  REPLIED
+  ARCHIVED
+  SPAM
+}
+
+model ContactMessage {
+  id        String        @id @default(cuid())
+  name      String
+  email     String
+  company   String?
+  country   String?
+  need      String?
+  message   String
+  status    MessageStatus @default(UNREAD)
+  version   Int           @default(0)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([status, createdAt])
+}
+
+enum MediaKind {
+  IMAGE
+  DOCUMENT
+}
+
+/// Tracks file metadata, dimensions and checksum for every upload. Bytes
+/// live in R2 (lib/media/storage.ts); this row is the only place the app
+/// reads metadata from — never the storage provider directly.
+model MediaAsset {
+  id           String    @id @default(cuid())
+  filename     String
+  objectKey    String    @unique
+  url          String
+  mimeType     String
+  extension    String
+  kind         MediaKind
+  byteSize     Int
+  checksum     String
+  width        Int?
+  height       Int?
+  altText      String?
+  caption      String?
+  archived     Boolean   @default(false)
+  uploadedById String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([archived, createdAt])
+}
+
+/// Search/social metadata override for one of the site's static pages.
+/// `key` matches the route's fixed identifier in the admin SEO editor
+/// (app/manage/(panel)/seo/page.tsx) — "home", "about", "team", etc. A
+/// null/empty field means "use the value shipped in that page's own
+/// `generateMetadata`" (lib/seo-overrides.ts never lets an empty override
+/// blank out a title or description).
+model PageSeo {
+  id             String   @id @default(cuid())
+  key            String   @unique
+  title          String?
+  description    String?
+  ogTitle        String?
+  ogDescription  String?
+  ogImage        String?
+  updatedById    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+/// Site-wide organisation facts behind the Organization/WebSite JSON-LD in
+/// app/layout.tsx and the footer's social links. Singleton: exactly one row,
+/// guarded by the unique `singleton` column. Every field is optional —
+/// `lib/content/site-settings.ts` falls back to the values shipped in the
+/// code for anything left empty, so an unconfigured database renders the
+/// site exactly as it does today.
+model SiteSettings {
+  id               String   @id @default(cuid())
+  singleton        Boolean  @unique @default(true)
+  organizationName String?
+  legalName        String?
+  alternateName    String?
+  slogan           String?
+  description      String?
+  foundingDate     String?
+  locality         String?
+  countryCode      String?
+  email            String?
+  phone            String?
+  linkedin         String?
+  x                String?
+  facebook         String?
+  instagram        String?
+  youtube          String?
+  /// SMTP delivery, editable from /manage/settings. `smtpPasswordEnc` holds
+  /// an AES-256-GCM ciphertext produced by lib/secret-box.ts (key derived
+  /// from AUTH_SECRET) — the plaintext password is never stored and is
+  /// never returned to the browser. Any field left empty falls back to the
+  /// matching SMTP_* environment variable, so an env-configured deployment
+  /// keeps working untouched.
+  smtpHost         String?
+  smtpPort         Int?
+  smtpSecure       Boolean?
+  smtpUser         String?
+  smtpPasswordEnc  String?
+  smtpFrom         String?
+  contactTo        String?
+  updatedById      String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+/// Optional page-level blocks. Published rows render before the bundled page
+/// component; when no published row exists, the bundled component is the
+/// fallback and the public site remains available without a database.
+model PageContent {
+  id        String        @id @default(cuid())
+  key       String        @unique
+  status    ContentStatus @default(DRAFT)
+  blocks    Json
+  version   Int           @default(0)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([status])
+}

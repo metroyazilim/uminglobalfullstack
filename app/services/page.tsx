@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { applyPageSeoOverride } from "@/lib/seo-overrides";
+import { PageContentSlot } from "@/components/PageContentBlocks";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -18,13 +20,17 @@ const DESCRIPTION = description(
   "automation and market entry - 42 pages, one per service.",
 );
 
-export const metadata: Metadata = {
+const BASE_METADATA: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: "/services" },
   openGraph: { title: TITLE, description: DESCRIPTION, url: "/services" },
   twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION },
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  return applyPageSeoOverride(BASE_METADATA, "services");
+}
 
 const ORDER: ServiceCategory[] = ["technology", "growth", "ai"];
 
@@ -50,6 +56,7 @@ export default function ServicesIndexPage() {
       <Header />
       <div className="pt-[72px] lg:pt-[104px]">
         <main>
+          <PageContentSlot pageKey="services" />
           <PageHeroBanner
             title="All Services"
             breadcrumbLabel="Services"

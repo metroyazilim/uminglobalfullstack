@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { applyPageSeoOverride } from "@/lib/seo-overrides";
+import { PageContentSlot } from "@/components/PageContentBlocks";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeroBanner from "@/components/PageHeroBanner";
@@ -14,7 +16,7 @@ import Section from "@/components/ui/Section";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbJsonLd, webPageJsonLd } from "@/components/structuredData";
 
-export const metadata: Metadata = {
+const BASE_METADATA: Metadata = {
   title: "About UMIN | UMIN Global",
   description:
     "UMIN Global is a New York based technology and growth company working across the UK, Europe, USA, Australia, Türkiye and the Middle East.",
@@ -25,6 +27,10 @@ export const metadata: Metadata = {
     url: "/about",
   },
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  return applyPageSeoOverride(BASE_METADATA, "about");
+}
 
 const PAGE_JSON_LD = webPageJsonLd({
   path: "/about",
@@ -43,6 +49,7 @@ export default function AboutUsPage() {
       <Header />
       <div className= "pt-[72px] lg:pt-[104px]">
         <main>
+          <PageContentSlot pageKey="about" />
           <PageHeroBanner
             title= "About UMIN"
             breadcrumbLabel= "About"

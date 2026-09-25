@@ -1,0 +1,24 @@
+# Local Postgres for admin-panel development only — the application itself runs
+# on the host with `npm run dev`. Production uses docker-compose.yml.
+#
+#   POSTGRES_PORT=5533 docker compose -f docker-compose.dev.yml up -d
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: umin
+      POSTGRES_PASSWORD: umin_dev_only
+      POSTGRES_DB: umin_global
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U umin -d umin_global"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  db-data:

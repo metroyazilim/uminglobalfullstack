@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { applyPageSeoOverride } from "@/lib/seo-overrides";
+import { PageContentSlot } from "@/components/PageContentBlocks";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CtaBanner from "@/components/CtaBanner";
@@ -12,7 +14,7 @@ import NumbersBand from "@/components/NumbersBand";
 import ProcessSection from "@/components/ProcessSection";
 import Section from "@/components/ui/Section";
 
-export const metadata: Metadata = {
+const BASE_METADATA: Metadata = {
   title: "UMIN Global | Higher Thinking. Greater Possibilities.",
   description:
     "UMIN Global helps ambitious businesses transform ideas into technology, brands, digital products and scalable companies.",
@@ -24,12 +26,17 @@ export const metadata: Metadata = {
   },
 };
 
+export async function generateMetadata(): Promise<Metadata> {
+  return applyPageSeoOverride(BASE_METADATA, "home");
+}
+
 export default function Home() {
   return (
     <>
       <Header />
       <div className= "pt-[72px] lg:pt-[104px]">
         <main>
+          <PageContentSlot pageKey="home" />
           <HomeHero />
           <JourneyBand />
 

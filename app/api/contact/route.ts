@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
+import { prisma } from "@/lib/db";
+import { hasDatabase } from "@/lib/env";
+import { resolveMailConfig } from "@/lib/mail";
 
 // The contact form used to hand the visitor a mailto: link, which only works if they have a mail
 // client configured and silently loses the enquiry if they do not. This route sends the mail
@@ -20,27 +23,6 @@ function clean(value: unknown, field: Field): string {
   // newline is a header-injection vector.
   const single = field === "message" ? value : value.replace(/[\r\n]+/g, " ");
   return single.trim().slice(0, MAX[field]);
-}
-
-function requiredEnv() {
-  const host = process.env.SMTP_HOST;
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
-  if (!host || !user || !pass) return null;
-
-  const port = Number(process.env.SMTP_PORT ?? 465);
-  return {
-    host,
-    port,
-    // Port 465 is implicit TLS; 587 and 25 start plaintext and upgrade with STARTTLS.
-    secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === "true" : port === 465,
-    user,
-    pass,
-    from: process.env.SMTP_FROM ?? user,
-    // Where enquiries are read. Defaults to the authenticated mailbox, because that address is
-    // guaranteed to exist on this SMTP account.
-    to: process.env.CONTACT_TO ?? process.env.SMTP_USER ?? user,
-  };
 }
 
 export async function POST(request: Request) {
@@ -74,10 +56,19 @@ export async function POST(request: Request) {
       { status: 422 },
     );
   }
+  if (hasDatabase()) {
+    try {
+      await prisma.contactMessage.create({
+        data: { name, email, company, country, need, message },
+      });
+    } catch (error) {
+      console.error("Contact form: database write failed", error);
+    }
+  }
 
-  const config = requiredEnv();
+  const config = await resolveMailConfig();
   if (!config) {
-    console.error("Contact form: SMTP_HOST/SMTP_USER/SMTP_PASS are not configured");
+    console.error("Contact form: mail is not configured");
     return NextResponse.json(
       { ok: false, error: "Mail is not configured on the server. Email info@uminglobal.com instead." },
       { status: 503 },
@@ -104,7 +95,7 @@ export async function POST(request: Request) {
 
     await transport.sendMail({
       from: `UMIN Global Website <${config.from}>`,
-      to: config.to,
+      to: config.contactTo,
       // The envelope sender stays the authenticated mailbox so SPF/DKIM still pass; the visitor's
       // address goes in Reply-To, which is what makes replying to the enquiry work.
       replyTo: `${name} <${email}>`,

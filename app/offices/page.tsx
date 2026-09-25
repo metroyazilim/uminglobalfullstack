@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { applyPageSeoOverride } from "@/lib/seo-overrides";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -7,7 +8,7 @@ import CtaBanner from "@/components/CtaBanner";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Reveal from "@/components/Reveal";
-import { OFFICES } from "@/components/offices";
+import { getOffices } from "@/lib/content/offices";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbJsonLd, collectionPageJsonLd } from "@/components/structuredData";
 
@@ -15,7 +16,7 @@ const TITLE = "Offices | UMIN Global";
 const DESCRIPTION =
   "UMIN Global works from New York, London, Melbourne, Istanbul, Dubai and Shanghai - one senior team, one reporting standard, local execution in seven regions.";
 
-export const metadata: Metadata = {
+const BASE_METADATA: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: "/offices" },
@@ -23,24 +24,31 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION },
 };
 
-const PAGE_JSON_LD = collectionPageJsonLd({
-  path: "/offices",
-  name: "Offices",
-  description: DESCRIPTION,
-  itemType: "LocalBusiness",
-  items: OFFICES.map((office) => ({
-    name: `UMIN Global ${office.city}`,
-    path: `/offices/${office.slug}`,
-    description: office.summary,
-  })),
-});
+export async function generateMetadata(): Promise<Metadata> {
+  return applyPageSeoOverride(BASE_METADATA, "offices");
+}
+
+export const revalidate = 300;
+
 
 const BREADCRUMB_JSON_LD = breadcrumbJsonLd([{ name: "Offices", path: "/offices" }]);
 
-export default function OfficesIndexPage() {
+export default async function OfficesIndexPage() {
+  const offices = await getOffices();
+  const pageJsonLd = collectionPageJsonLd({
+    path: "/offices",
+    name: "Offices",
+    description: DESCRIPTION,
+    itemType: "LocalBusiness",
+    items: offices.map((office) => ({
+      name: `UMIN Global ${office.city}`,
+      path: `/offices/${office.slug}`,
+      description: office.summary,
+    })),
+  });
   return (
     <>
-      <JsonLd data={PAGE_JSON_LD} />
+      <JsonLd data={pageJsonLd} />
       <JsonLd data={BREADCRUMB_JSON_LD} />
       <Header />
       <div className="pt-[72px] lg:pt-[104px]">
@@ -58,7 +66,7 @@ export default function OfficesIndexPage() {
               lead="Each office covers a region and works to the same delivery and reporting standard set in New York."
             />
             <div className="pt-8">
-              {OFFICES.map((office, index) => (
+              {offices.map((office, index) => (
                 <Reveal key={office.slug} delay={index === 0 ? 0 : index === 1 ? 1 : 2}>
                   <Link href={`/offices/${office.slug}`} className="group block py-6">
                     <div className="flex flex-col gap-1 lg:flex-row lg:items-baseline lg:gap-8">

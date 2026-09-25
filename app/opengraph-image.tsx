@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { ImageResponse } from "next/og";
 
 export const size = { width: 1200, height: 630 };
@@ -7,6 +9,10 @@ export const alt = "UMIN Global - Higher Thinking. Greater Possibilities.";
 // Default social card for every route that does not generate its own. Rendered at build time
 // from the brand tokens rather than shipped as a static PNG, so a copy change never leaves a
 // stale image behind.
+
+// Read once at module scope, inlined as a data URI: satori cannot fetch a
+// relative asset, and the file is part of the build input anyway.
+const WORDMARK = `data:image/png;base64,${readFileSync(join(process.cwd(), "public/brand/umin-logo-light-900.png")).toString("base64")}`;
 export default function OpengraphImage() {
   return new ImageResponse(
     (
@@ -36,10 +42,7 @@ export default function OpengraphImage() {
             Technology, AI, growth, ventures and market entry - one senior team.
           </div>
         </div>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 14, color: "#fff", fontSize: 34 }}>
-          <span style={{ fontWeight: 800 }}>UMIN</span>
-          <span style={{ color: "rgba(255,255,255,0.65)", fontWeight: 500 }}>GLOBAL</span>
-        </div>
+        <img src={WORDMARK} alt="UMIN Global" width={300} height={96} style={{ objectFit: "contain" }} />
       </div>
     ),
     size,

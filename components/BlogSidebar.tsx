@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { otherInsights } from "./insights";
+import { getOtherInsights } from "@/lib/content/insights";
 
 // Insights aside: what the notes are, the other articles, and the topics they map to. The search
 // box and the comment widgets went - neither had anything behind them.
@@ -14,8 +14,8 @@ const TOPICS: { label: string; href: string }[] = [
   { label: "Global Strategy", href: "/global-strategy" },
 ];
 
-export default function BlogSidebar({ currentSlug }: { currentSlug?: string }) {
-  const recent = otherInsights(currentSlug);
+export default async function BlogSidebar({ currentSlug }: { currentSlug?: string }) {
+  const recent = await getOtherInsights(currentSlug);
 
   return (
     <aside className="lg:sticky lg:top-[132px]">

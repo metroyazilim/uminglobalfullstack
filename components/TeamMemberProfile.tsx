@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Reveal from "./Reveal";
 import Button from "./ui/Button";
+import { RichText } from "./RichText";
 import Section from "./ui/Section";
 import type { TeamMember } from "./teamMembers";
 
@@ -32,9 +33,7 @@ export default function TeamMemberProfile({ member }: { member: TeamMember }) {
             {member.role}
           </span>
           {member.bio.map((paragraph) => (
-            <p key={paragraph} className="t-lead pt-4 text-body">
-              {paragraph}
-            </p>
+            <RichText key={paragraph} html={paragraph} className="t-lead pt-4 text-body" />
           ))}
 
           <h2 className="t-h3 pt-8 text-ink">Capabilities he runs</h2>

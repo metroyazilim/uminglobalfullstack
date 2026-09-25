@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { SERVICES } from "@/components/services";
-import { OFFICES } from "@/components/offices";
-import { TEAM_MEMBERS } from "@/components/teamMembers";
+import { getOfficeSlugs } from "@/lib/content/offices";
+import { getTeamSlugs } from "@/lib/content/team";
 import { INSIGHTS } from "@/components/insights";
 import { SITE_URL } from "@/components/seo";
 
@@ -33,7 +33,8 @@ const STATIC_ROUTES: Entry[] = [
   { path: "/contact", priority: 0.7, changeFrequency: "yearly" },
 ];
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const [officeSlugs, teamSlugs] = await Promise.all([getOfficeSlugs(), getTeamSlugs()]);
   const buildDate = new Date();
   const entries: Entry[] = [
     ...STATIC_ROUTES,
@@ -42,13 +43,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.6,
       changeFrequency: "monthly" as const,
     })),
-    ...OFFICES.map((office) => ({
-      path: `/offices/${office.slug}`,
+    ...officeSlugs.map((slug) => ({
+      path: `/offices/${slug}`,
       priority: 0.6,
       changeFrequency: "yearly" as const,
     })),
-    ...TEAM_MEMBERS.map((member) => ({
-      path: `/team/${member.slug}`,
+    ...teamSlugs.map((slug) => ({
+      path: `/team/${slug}`,
       priority: 0.5,
       changeFrequency: "yearly" as const,
     })),
