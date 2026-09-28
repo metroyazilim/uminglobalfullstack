@@ -1,6 +1,6 @@
 "use client";
 
-import { Archive, FileText, Image as ImageIcon, Save, Trash2, Upload } from "lucide-react";
+import { Archive, FileText, Image as ImageIcon, LayoutGrid, List as ListIcon, Save, Trash2, Upload } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef, useState, useTransition, type FormEvent } from "react";
@@ -30,6 +30,8 @@ import {
   type MediaActionState,
 } from "./actions";
 
+type MediaView = "grid" | "list";
+
 const initialActionState: MediaActionState = { status: "idle" };
 
 function formatBytes(bytes: number): string {
@@ -38,7 +40,7 @@ function formatBytes(bytes: number): string {
   return `${(bytes / 1_048_576).toFixed(1)} MB`;
 }
 
-function AssetCard({ asset }: { asset: MediaAssetDto }) {
+function AssetCard({ asset, view }: { asset: MediaAssetDto; view: MediaView }) {
   const router = useRouter();
   const { toast } = useToast();
   const [transitionPending, startTransition] = useTransition();
@@ -86,14 +88,19 @@ function AssetCard({ asset }: { asset: MediaAssetDto }) {
   const mutationPending = transitionPending || archivePending || deletePending;
 
   return (
-    <article className={`${card} overflow-hidden`}>
-      <a href={asset.url} target="_blank" rel="noopener noreferrer" className="relative flex aspect-4/3 items-center justify-center overflow-hidden bg-brand-muted-surface">
+    <article className={view === "list" ? `${card} flex overflow-hidden` : `${card} overflow-hidden`}>
+      <a
+        href={asset.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={view === "list" ? "relative h-28 w-36 shrink-0 overflow-hidden bg-brand-muted-surface sm:h-32 sm:w-44" : "relative flex aspect-4/3 items-center justify-center overflow-hidden bg-brand-muted-surface"}
+      >
         {asset.kind === "IMAGE" ? (
           <Image
             src={asset.url}
             alt={asset.altText || asset.filename}
             fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            sizes={view === "list" ? "176px" : "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"}
             className="object-contain"
             unoptimized
           />
@@ -102,7 +109,7 @@ function AssetCard({ asset }: { asset: MediaAssetDto }) {
         )}
       </a>
 
-      <div className="border-t border-brand-border p-4">
+      <div className={view === "list" ? "min-w-0 flex-1 p-3" : "border-t border-brand-border p-3"}>
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h2 className="truncate text-sm font-bold text-brand-text" title={asset.filename}>{asset.filename}</h2>
@@ -167,6 +174,7 @@ export function MediaLibraryView({
   const formRef = useRef<HTMLFormElement>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [view, setView] = useState<MediaView>("grid");
 
   async function upload(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -223,9 +231,24 @@ export function MediaLibraryView({
       {assets.length === 0 ? (
         <EmptyState icon={ImageIcon} title="No media found" description="Upload your first file using the form above." />
       ) : (
-        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-          {assets.map((asset) => <AssetCard key={asset.id} asset={asset} />)}
-        </div>
+        <>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-muted">{total} assets</p>
+            <div className="flex items-center gap-2" aria-label="Media view">
+              <button type="button" className={view === "grid" ? primaryButton : secondaryButton} aria-pressed={view === "grid"} onClick={() => setView("grid")}>
+                <LayoutGrid className="size-3.5" aria-hidden="true" />
+                Grid
+              </button>
+              <button type="button" className={view === "list" ? primaryButton : secondaryButton} aria-pressed={view === "list"} onClick={() => setView("list")}>
+                <ListIcon className="size-3.5" aria-hidden="true" />
+                List
+              </button>
+            </div>
+          </div>
+          <div className={view === "list" ? "space-y-3" : "grid gap-3 sm:grid-cols-3 xl:grid-cols-4"}>
+            {assets.map((asset) => <AssetCard key={asset.id} asset={asset} view={view} />)}
+          </div>
+        </>
       )}
 
       <Pagination page={page} pageSize={pageSize} total={total} basePath="/manage/media" />
