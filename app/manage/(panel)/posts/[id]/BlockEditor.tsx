@@ -79,7 +79,9 @@ export function BlockEditor({ value, onChange }: BlockEditorProps) {
           )}
         </div>
       ))}
-      <button type="button" onClick={() => onChange([...value, { kind: "p", text: "" }])} className={`${secondaryButton} rounded-none`}><Plus className="size-4" aria-hidden="true" />Add block</button>
+      <div className="flex flex-wrap gap-2">
+        {(Object.keys(KIND_LABELS) as Block["kind"][]).map((kind) => <button key={kind} type="button" onClick={() => onChange([...value, emptyBlock(kind)])} className={`${secondaryButton} rounded-none`}><Plus className="size-3.5" aria-hidden="true" />{KIND_LABELS[kind]}</button>)}
+      </div>
     </div>
   );
 }
