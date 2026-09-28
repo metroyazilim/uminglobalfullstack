@@ -12,7 +12,7 @@ import Section from "@/components/ui/Section";
 import Button from "@/components/ui/Button";
 import Reveal from "@/components/Reveal";
 import JsonLd from "@/components/JsonLd";
-import { OFFICES } from "@/components/offices";
+import { getOffices } from "@/lib/content/offices";
 import { SITE_URL, description } from "@/components/seo";
 import { breadcrumbJsonLd } from "@/components/structuredData";
 
@@ -44,7 +44,8 @@ const DECISIONS = [
 // behind it is the one Google will not show in the SERP.
 const BREADCRUMB_JSON_LD = breadcrumbJsonLd([{ name: "Global Strategy", path: "/global-strategy" }]);
 
-export default function GlobalStrategyPage() {
+export default async function GlobalStrategyPage() {
+  const offices = await getOffices();
   return (
     <>
       <JsonLd
@@ -116,7 +117,7 @@ export default function GlobalStrategyPage() {
               lead="Each office has its own page: what it covers and what is run from there."
             />
             <ul className="pt-8">
-              {OFFICES.map((office) => (
+              {offices.map((office) => (
                 <li key={office.slug}>
                   <Link href={`/offices/${office.slug}`} className="group block py-3">
                     <span className="t-h3 flex items-center gap-3 text-ink group-hover:text-accent">

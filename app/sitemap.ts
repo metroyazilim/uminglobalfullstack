@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { SERVICES } from "@/components/services";
 import { getOfficeSlugs } from "@/lib/content/offices";
 import { getTeamSlugs } from "@/lib/content/team";
-import { INSIGHTS } from "@/components/insights";
+import { getInsights } from "@/lib/content/insights";
 import { SITE_URL } from "@/components/seo";
 
 type Entry = {
@@ -34,7 +34,7 @@ const STATIC_ROUTES: Entry[] = [
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [officeSlugs, teamSlugs] = await Promise.all([getOfficeSlugs(), getTeamSlugs()]);
+  const [officeSlugs, teamSlugs, insights] = await Promise.all([getOfficeSlugs(), getTeamSlugs(), getInsights()]);
   const buildDate = new Date();
   const entries: Entry[] = [
     ...STATIC_ROUTES,
@@ -53,7 +53,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.5,
       changeFrequency: "yearly" as const,
     })),
-    ...INSIGHTS.map((post) => ({
+    ...insights.map((post) => ({
       path: `/insights/${post.slug}`,
       priority: 0.6,
       changeFrequency: "yearly" as const,

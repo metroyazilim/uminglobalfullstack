@@ -132,12 +132,6 @@ export default function MobileSidebar({ items }: MobileSidebarProps) {
           >
             Start a Project
           </Button>
-          <span className="mt-5 block text-[12px] font-semibold uppercase tracking-[0.5px] text-label">
-            Email
-          </span>
-          <a href="mailto:info@uminglobal.com" className="mt-1 block text-[15px] font-bold text-ink">
-            info@uminglobal.com
-          </a>
         </div>
       </aside>
     </div>

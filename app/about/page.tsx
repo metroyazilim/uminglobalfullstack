@@ -10,7 +10,7 @@ import AboutStats from "@/components/AboutStats";
 import AboutMissionCards from "@/components/AboutMissionCards";
 import RegionStrip from "@/components/RegionStrip";
 import TeamCard from "@/components/TeamCard";
-import { TEAM_MEMBERS } from "@/components/teamMembers";
+import { getTeamMembers } from "@/lib/content/team";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Section from "@/components/ui/Section";
 import JsonLd from "@/components/JsonLd";
@@ -41,7 +41,8 @@ const PAGE_JSON_LD = webPageJsonLd({
 
 const BREADCRUMB_JSON_LD = breadcrumbJsonLd([{ name: "About", path: "/about" }]);
 
-export default function AboutUsPage() {
+export default async function AboutUsPage() {
+  const teamMembers = await getTeamMembers();
   return (
     <>
       <JsonLd data={PAGE_JSON_LD} />
@@ -83,7 +84,7 @@ export default function AboutUsPage() {
               lead="The founder owns the commercial side of every engagement; the CTO owns what gets built. There is no third layer."
             />
             <div className="grid grid-cols-1 gap-5 pt-10 sm:grid-cols-2 lg:grid-cols-3">
-              {TEAM_MEMBERS.map((member, index) => (
+              {teamMembers.map((member, index) => (
                 <TeamCard key={member.slug} member={member} delay={index === 0 ? 0 : index === 1 ? 1 : 2} />
               ))}
             </div>

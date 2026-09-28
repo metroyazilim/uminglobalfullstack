@@ -62,12 +62,6 @@ export default function Header() {
           </nav>
 
           <div className="hidden shrink-0 items-center gap-6 lg:flex">
-            <a
-              href="mailto:info@uminglobal.com"
-              className="text-[15px] font-bold text-brand transition-colors duration-200 hover:text-ink"
-            >
-              info@uminglobal.com
-            </a>
             <Button href="/contact" withArrow={false} className="text-[13px] uppercase tracking-[0.5px]">
               Start a Project
             </Button>
