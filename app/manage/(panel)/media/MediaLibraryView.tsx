@@ -1,6 +1,6 @@
 "use client";
 
-import { Archive, FileText, Image as ImageIcon, LayoutGrid, List as ListIcon, Save, Trash2, Upload } from "lucide-react";
+import { FileText, Image as ImageIcon, LayoutGrid, List as ListIcon, Trash2, Upload } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef, useState, useTransition, type FormEvent } from "react";
@@ -13,22 +13,15 @@ import {
   card,
   cardPadded,
   fieldError,
-  fieldHint,
   fieldInput,
   fieldLabel,
-  fieldTextarea,
   helpText,
   primaryButton,
   secondaryButton,
   sectionTitle,
 } from "@/components/admin/ui";
 import type { MediaAssetDto } from "@/lib/media/types";
-import {
-  archiveMediaAssetAction,
-  deleteMediaAssetAction,
-  updateMediaMetadataAction,
-  type MediaActionState,
-} from "./actions";
+import { deleteMediaAssetAction, type MediaActionState } from "./actions";
 
 type MediaView = "grid" | "list";
 
@@ -44,36 +37,10 @@ function AssetCard({ asset, view }: { asset: MediaAssetDto; view: MediaView }) {
   const router = useRouter();
   const { toast } = useToast();
   const [transitionPending, startTransition] = useTransition();
-  const [metadataState, metadataAction, metadataPending] = useActionState(
-    async (_previous: MediaActionState, formData: FormData) => updateMediaMetadataAction(asset.id, formData),
-    initialActionState,
-  );
-  const [archiveState, runArchive, archivePending] = useActionState(
-    async (_previous: MediaActionState, archived: boolean) => archiveMediaAssetAction(asset.id, archived),
-    initialActionState,
-  );
   const [deleteState, runDelete, deletePending] = useActionState(
-    async (_previous: MediaActionState) => deleteMediaAssetAction(asset.id),
+    () => deleteMediaAssetAction(asset.id),
     initialActionState,
   );
-
-  useEffect(() => {
-    if (metadataState.status === "success") {
-      toast(metadataState.success);
-      router.refresh();
-    } else if (metadataState.status === "error") {
-      toast(metadataState.error, "error");
-    }
-  }, [metadataState, router, toast]);
-
-  useEffect(() => {
-    if (archiveState.status === "success") {
-      toast(archiveState.success);
-      router.refresh();
-    } else if (archiveState.status === "error") {
-      toast(archiveState.error, "error");
-    }
-  }, [archiveState, router, toast]);
 
   useEffect(() => {
     if (deleteState.status === "success") {
@@ -85,7 +52,7 @@ function AssetCard({ asset, view }: { asset: MediaAssetDto; view: MediaView }) {
   }, [deleteState, router, toast]);
 
   const dimensions = asset.width && asset.height ? `${asset.width} × ${asset.height}px` : "Dimensions unavailable";
-  const mutationPending = transitionPending || archivePending || deletePending;
+  const mutationPending = transitionPending || deletePending;
 
   return (
     <article className={view === "list" ? `${card} flex overflow-hidden` : `${card} overflow-hidden`}>
@@ -93,65 +60,41 @@ function AssetCard({ asset, view }: { asset: MediaAssetDto; view: MediaView }) {
         href={asset.url}
         target="_blank"
         rel="noopener noreferrer"
-        className={view === "list" ? "relative h-28 w-36 shrink-0 overflow-hidden bg-brand-muted-surface sm:h-32 sm:w-44" : "relative flex aspect-4/3 items-center justify-center overflow-hidden bg-brand-muted-surface"}
+        className={view === "list" ? "relative h-24 w-32 shrink-0 overflow-hidden bg-brand-muted-surface sm:h-28 sm:w-40" : "relative flex aspect-4/3 items-center justify-center overflow-hidden bg-brand-muted-surface"}
       >
         {asset.kind === "IMAGE" ? (
           <Image
             src={asset.url}
             alt={asset.altText || asset.filename}
             fill
-            sizes={view === "list" ? "176px" : "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"}
+            sizes={view === "list" ? "160px" : "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"}
             className="object-contain"
             unoptimized
           />
         ) : (
-          <FileText className="size-14 text-brand-muted" aria-hidden="true" />
+          <FileText className="size-10 text-brand-muted" aria-hidden="true" />
         )}
       </a>
 
       <div className={view === "list" ? "min-w-0 flex-1 p-3" : "border-t border-brand-border p-3"}>
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <h2 className="truncate text-sm font-bold text-brand-text" title={asset.filename}>{asset.filename}</h2>
             <p className={`${helpText} mt-1`}>{dimensions} · {formatBytes(asset.byteSize)}</p>
           </div>
           {asset.kind === "IMAGE" ? <ImageIcon className="size-4 shrink-0 text-brand-muted" aria-label="Image" /> : <FileText className="size-4 shrink-0 text-brand-muted" aria-label="Document" />}
         </div>
-
-        <form action={metadataAction} className="mt-4 space-y-3">
-          <label className={fieldLabel}>
-            Alt text
-            <input name="altText" defaultValue={asset.altText ?? ""} maxLength={500} className={fieldInput} />
-          </label>
-          <label className={fieldLabel}>
-            Description
-            <textarea name="caption" defaultValue={asset.caption ?? ""} maxLength={2_000} rows={2} className={fieldTextarea} />
-          </label>
-          <button type="submit" disabled={metadataPending} className={secondaryButton}>
-            <Save className="size-3.5" aria-hidden="true" />
-            {metadataPending ? "Saving…" : "Save details"}
-          </button>
-        </form>
-
-        <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-brand-border pt-4">
+        {asset.altText ? <p className="mt-2 line-clamp-1 text-xs text-brand-muted" title={asset.altText}>{asset.altText}</p> : null}
+        {asset.caption ? <p className="mt-1 line-clamp-1 text-xs text-brand-muted" title={asset.caption}>{asset.caption}</p> : null}
+        <div className="mt-3 flex justify-end border-t border-brand-border pt-3">
           <ConfirmButton
             disabled={mutationPending}
-            tone="neutral"
-            confirmLabel={asset.archived ? "Restore" : "Archive"}
-            onConfirm={() => startTransition(() => runArchive(!asset.archived))}
-          >
-            <Archive className="size-3.5" aria-hidden="true" />
-            {asset.archived ? "Unarchive" : "Archive"}
-          </ConfirmButton>
-          <ConfirmButton
-            disabled={!asset.archived || mutationPending}
             confirmLabel="Delete permanently"
             onConfirm={() => startTransition(() => runDelete())}
           >
             <Trash2 className="size-3.5" aria-hidden="true" />
             Delete
           </ConfirmButton>
-          {!asset.archived ? <span className={fieldHint}>Archive it first to delete.</span> : null}
         </div>
       </div>
     </article>
@@ -205,19 +148,15 @@ export function MediaLibraryView({
     <div className="space-y-6">
       <section className={cardPadded}>
         <h2 className={sectionTitle}>Upload file</h2>
-        <p className={`${helpText} mt-1`}>Upload a JPG, PNG, WebP, GIF, SVG, or PDF file.</p>
-        <form ref={formRef} onSubmit={upload} className="mt-4 grid items-stretch gap-4 lg:grid-cols-2">
+        <p className={`${helpText} mt-1`}>Images are stored as WebP at 85% quality.</p>
+        <form ref={formRef} onSubmit={upload} className="mt-3 grid items-center gap-3 lg:grid-cols-[minmax(0,1fr)_18rem]">
           <FileDropzone name="file" accept=".jpg,.jpeg,.png,.webp,.gif,.svg,.pdf" className="h-full" />
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3">
             <label className={fieldLabel}>
               Alt text <span className="normal-case tracking-normal">(optional)</span>
               <input name="altText" maxLength={500} className={fieldInput} />
             </label>
-            <label className={fieldLabel}>
-              Description <span className="normal-case tracking-normal">(optional)</span>
-              <input name="caption" maxLength={2_000} className={fieldInput} />
-            </label>
-            <div className="mt-auto">
+            <div>
               <button type="submit" disabled={uploading} className={primaryButton}>
                 <Upload className="size-4" aria-hidden="true" />
                 {uploading ? "Uploading…" : "Upload"}

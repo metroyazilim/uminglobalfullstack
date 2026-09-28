@@ -4,7 +4,6 @@
 // Next's default error screen in development and a blank document in production. Here the visitor
 // keeps the site chrome, can retry the render, and can reach a person.
 import { useEffect } from "react";
-import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeroBanner from "@/components/PageHeroBanner";
 import Section from "@/components/ui/Section";
@@ -20,7 +19,6 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
 
   return (
     <>
-      <Header />
       <div className="pt-[72px] lg:pt-[104px]">
         <main>
           <PageHeroBanner

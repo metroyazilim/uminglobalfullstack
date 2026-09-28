@@ -13,7 +13,8 @@ export type Block =
   | { kind: "h2"; text: string }
   | { kind: "list"; items: string[] }
   /** Pulled-out sentence: the one line worth remembering from the section above it. */
-  | { kind: "callout"; text: string };
+  | { kind: "callout"; text: string }
+  | { kind: "image"; src: string; alt: string; caption?: string };
 
 export interface InsightPost {
   slug: string;

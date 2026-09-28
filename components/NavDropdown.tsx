@@ -1,10 +1,5 @@
 "use client";
 
-// A primary nav item that reveals a short list of sub-links instead of linking directly.
-// Click-to-toggle rather than hover-only so it works the same on touch and with a mouse; closes
-// on an outside click, Escape, or any scroll. The panel renders through a portal at a fixed
-// position computed from the trigger, so it is never clipped or stacked under the fixed header
-// it hangs from, whatever overflow or z-index the header row itself carries.
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
@@ -13,9 +8,26 @@ import ChevronIcon from "./icons/ChevronIcon";
 interface NavLink {
   label: string;
   href: string;
+  children?: readonly NavLink[];
 }
 
-export default function NavDropdown({ label, items }: { label: string; items: NavLink[] }) {
+function MenuItem({ item, depth = 0, onSelect }: { item: NavLink; depth?: number; onSelect: () => void }) {
+  return (
+    <div>
+      <Link
+        href={item.href}
+        role="menuitem"
+        onClick={onSelect}
+        className={`block px-5 py-2.5 text-[13px] font-semibold uppercase tracking-[0.5px] text-nav transition-colors hover:bg-section-gray hover:text-brand ${depth > 0 ? "pl-8 text-[12px]" : ""}`}
+      >
+        {item.label}
+      </Link>
+      {item.children?.map((child) => <MenuItem key={child.href} item={child} depth={depth + 1} onSelect={onSelect} />)}
+    </div>
+  );
+}
+
+export default function NavDropdown({ label, href, items }: { label: string; href?: string; items: readonly NavLink[] }) {
   const [open, setOpen] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -25,13 +37,13 @@ export default function NavDropdown({ label, items }: { label: string; items: Na
     if (!open) return;
 
     const close = () => setOpen(false);
-    const onPointerDown = (e: MouseEvent) => {
-      const target = e.target as Node;
+    const onPointerDown = (event: MouseEvent) => {
+      const target = event.target as Node;
       if (triggerRef.current?.contains(target) || panelRef.current?.contains(target)) return;
       close();
     };
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") close();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") close();
     };
     document.addEventListener("mousedown", onPointerDown);
     document.addEventListener("keydown", onKeyDown);
@@ -50,7 +62,7 @@ export default function NavDropdown({ label, items }: { label: string; items: Na
       const rect = triggerRef.current.getBoundingClientRect();
       setPosition({ top: rect.bottom + 8, left: rect.left });
     }
-    setOpen((v) => !v);
+    setOpen((value) => !value);
   };
 
   return (
@@ -64,34 +76,15 @@ export default function NavDropdown({ label, items }: { label: string; items: Na
         className="inline-flex items-center gap-1 px-3 text-[12px] font-semibold uppercase tracking-[0.5px] text-nav transition-colors duration-200 hover:text-brand lg:px-[14.4px] lg:text-[13px]"
       >
         {label}
-        <ChevronIcon
-          direction="right"
-          className={`h-2.5 w-2.5 transition-transform duration-200 ${open ? "-rotate-90" : "rotate-90"}`}
-        />
+        <ChevronIcon direction="right" className={`h-2.5 w-2.5 transition-transform duration-200 ${open ? "-rotate-90" : "rotate-90"}`} />
       </button>
-
-      {open &&
-        createPortal(
-          <div
-            ref={panelRef}
-            role="menu"
-            style={{ top: position.top, left: position.left }}
-            className="fixed z-[80] w-[200px] overflow-hidden rounded-card border border-divider bg-white shadow-raised"
-          >
-            {items.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                role="menuitem"
-                onClick={() => setOpen(false)}
-                className="block px-5 py-3 text-[13px] font-semibold uppercase tracking-[0.5px] text-nav transition-colors duration-200 hover:bg-section-gray hover:text-brand"
-              >
-                {item.label}
-              </Link>
-            ))}
-          </div>,
-          document.body,
-        )}
+      {open ? createPortal(
+        <div ref={panelRef} role="menu" style={{ top: position.top, left: position.left }} className="fixed z-[80] w-[240px] overflow-hidden rounded-card border border-divider bg-white py-1 shadow-raised">
+          {href ? <MenuItem item={{ label, href }} onSelect={() => setOpen(false)} /> : null}
+          {items.map((item) => <MenuItem key={item.href} item={item} onSelect={() => setOpen(false)} />)}
+        </div>,
+        document.body,
+      ) : null}
     </>
   );
 }

@@ -18,8 +18,7 @@ import { breadcrumbJsonLd } from "@/components/structuredData";
 import type { Block } from "@/components/insights";
 import { getInsight, getInsightSlugs } from "@/lib/content/insights";
 
-// One route for every article; the content is managed through the admin with bundled content as
-// a fallback when the database is unavailable.
+// One route for every published database article. Slugs and content are managed from the admin panel.
 export async function generateStaticParams() {
   const slugs = await getInsightSlugs();
   return slugs.map((slug) => ({ slug }));
@@ -78,6 +77,15 @@ function BodyBlock({ block }: { block: Block }) {
       return (
         <RichText html={block.text} className="t-lead mt-8 border-l-2 border-accent pl-6 font-medium text-ink" />
       );
+    case "image":
+      return (
+        <figure className="mt-8">
+          <div className="relative aspect-[16/9] overflow-hidden border border-divider">
+            <Image src={block.src} alt={block.alt} fill sizes="(max-width: 800px) 100vw, 800px" className="object-cover" unoptimized />
+          </div>
+          {block.caption ? <figcaption className="mt-2 text-sm text-body">{block.caption}</figcaption> : null}
+        </figure>
+      );
   }
 }
 
@@ -95,20 +103,12 @@ export default async function InsightArticlePage({ params }: { params: Promise<{
     headline: post.title,
     description: post.description,
     url,
-    mainEntityOfPage: { "@type": "WebPage", "@id": url },
-    datePublished: post.date,
-    dateModified: post.updated ?? post.date,
-    inLanguage: "en",
-    keywords: post.keywords.join(", "),
-    articleSection: post.topic,
-    timeRequired: `PT${post.readingMinutes}M`,
-    // Word count is a genuine quality signal for article rich results, and deriving it means it
-    // cannot drift from the text actually rendered below.
     wordCount: post.body.reduce(
-      (total, block) =>
-        total + (block.kind === "list" ? block.items.join(" ") : block.text).trim().split(/\s+/).length,
+      (total, block) => total + (block.kind === "image" ? 0 : (block.kind === "list" ? block.items.join(" ") : block.text).trim().split(/\s+/).length),
       0,
     ),
+    articleSection: post.topic,
+    timeRequired: `PT${post.readingMinutes}M`,
     author: { "@type": "Organization", name: "UMIN Global", url: SITE_URL },
     publisher: { "@id": `${SITE_URL}/#organization` },
     isPartOf: { "@id": `${SITE_URL}/#website` },

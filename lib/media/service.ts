@@ -1,6 +1,9 @@
 import "server-only";
+
+import sharp from "sharp";
 import type { PrismaClient } from "@prisma/client";
 import { getStorageProvider } from "./storage";
+import { calculateChecksum } from "./validation";
 import type { MediaAssetDto, ValidatedMediaInput } from "./types";
 
 function generateObjectKey(sanitizedFilename: string): string {
@@ -32,33 +35,32 @@ function toMediaAssetDto(row: MediaAssetRow): MediaAssetDto {
   return { ...row };
 }
 
-/** Uploads a validated file to the configured storage provider and creates
- * its `MediaAsset` row. The two steps are sequential, not transactional: if
- * the row write fails after a successful upload, the object is orphaned in
- * storage rather than the row pointing at bytes that were never written —
- * the safer failure direction for a media library. */
+/** Uploads a validated file to storage and creates its MediaAsset row. */
 export async function createMediaAsset(
   prisma: PrismaClient,
   input: ValidatedMediaInput,
   context: { userId: string },
   options?: { altText?: string; caption?: string },
 ): Promise<MediaAssetDto> {
+  const normalized = input.kind === "IMAGE"
+    ? await normalizeImageInput(input)
+    : input;
   const storage = getStorageProvider();
-  const objectKey = generateObjectKey(input.filename);
-  const uploadResult = await storage.upload({ objectKey, buffer: input.buffer, mimeType: input.mimeType });
+  const objectKey = generateObjectKey(normalized.filename);
+  const uploadResult = await storage.upload({ objectKey, buffer: normalized.buffer, mimeType: normalized.mimeType });
 
   const row = await prisma.mediaAsset.create({
     data: {
-      filename: input.filename,
+      filename: normalized.filename,
       objectKey: uploadResult.objectKey,
       url: uploadResult.url,
-      mimeType: input.mimeType,
-      extension: input.extension,
-      kind: input.kind,
-      byteSize: input.byteSize,
-      checksum: input.checksum,
-      width: input.width,
-      height: input.height,
+      mimeType: normalized.mimeType,
+      extension: normalized.extension,
+      kind: normalized.kind,
+      byteSize: normalized.byteSize,
+      checksum: normalized.checksum,
+      width: normalized.width,
+      height: normalized.height,
       altText: options?.altText ?? null,
       caption: options?.caption ?? null,
       uploadedById: context.userId,
@@ -66,6 +68,75 @@ export async function createMediaAsset(
   });
 
   return toMediaAssetDto(row);
+}
+
+function webpFilename(filename: string): string {
+  return filename.replace(/\.[^.]+$/, "") + ".webp";
+}
+
+async function normalizeImageInput(input: ValidatedMediaInput): Promise<ValidatedMediaInput> {
+  const buffer = await sharp(input.buffer).webp({ quality: 85 }).toBuffer();
+  const metadata = await sharp(buffer).metadata();
+  return {
+    ...input,
+    buffer,
+    filename: webpFilename(input.filename),
+    mimeType: "image/webp",
+    extension: ".webp",
+    byteSize: buffer.length,
+    checksum: calculateChecksum(buffer),
+    width: metadata.width ?? input.width,
+    height: metadata.height ?? input.height,
+  };
+}
+
+/** Converts existing image rows and their R2 objects to WebP at quality 85. */
+export async function convertImageAssetsToWebp(prisma: PrismaClient): Promise<{ converted: number; skipped: number }> {
+  const rows = await prisma.mediaAsset.findMany({
+    where: {
+      kind: "IMAGE",
+      OR: [{ mimeType: { not: "image/webp" } }, { extension: { not: ".webp" } }],
+    },
+    orderBy: { createdAt: "asc" },
+  });
+  const storage = getStorageProvider();
+  let converted = 0;
+
+  for (const row of rows) {
+    const response = await fetch(row.url);
+    if (!response.ok) throw new Error(`Could not read ${row.filename} (${response.status}).`);
+    const source = Buffer.from(await response.arrayBuffer());
+    const buffer = await sharp(source).webp({ quality: 85 }).toBuffer();
+    const metadata = await sharp(buffer).metadata();
+    const filename = webpFilename(row.filename);
+    const objectKey = generateObjectKey(filename);
+    const uploadResult = await storage.upload({ objectKey, buffer, mimeType: "image/webp" });
+
+    try {
+      await prisma.mediaAsset.update({
+        where: { id: row.id },
+        data: {
+          filename,
+          objectKey: uploadResult.objectKey,
+          url: uploadResult.url,
+          mimeType: "image/webp",
+          extension: ".webp",
+          byteSize: buffer.length,
+          checksum: calculateChecksum(buffer),
+          width: metadata.width ?? row.width,
+          height: metadata.height ?? row.height,
+        },
+      });
+    } catch (error) {
+      await storage.delete(uploadResult.objectKey).catch(() => false);
+      throw error;
+    }
+
+    await storage.delete(row.objectKey);
+    converted += 1;
+  }
+
+  return { converted, skipped: await prisma.mediaAsset.count({ where: { kind: "IMAGE" } }) - converted };
 }
 
 export async function listMediaAssets(
@@ -84,23 +155,8 @@ export async function listMediaAssets(
   return { assets: rows.map(toMediaAssetDto), total, page, pageSize };
 }
 
-export async function updateMediaAssetMetadata(
-  prisma: PrismaClient,
-  id: string,
-  metadata: { altText?: string | null; caption?: string | null },
-): Promise<MediaAssetDto> {
-  const row = await prisma.mediaAsset.update({ where: { id }, data: metadata });
-  return toMediaAssetDto(row);
-}
 
-export async function archiveMediaAsset(prisma: PrismaClient, id: string, archived: boolean): Promise<MediaAssetDto> {
-  const row = await prisma.mediaAsset.update({ where: { id }, data: { archived } });
-  return toMediaAssetDto(row);
-}
-
-/** Hard delete: removes the storage object and the row. Called only on an
- * already-archived asset from the admin UI, so an accidental click cannot
- * remove a live reference in one step. */
+/** Hard delete removes the storage object and its MediaAsset row. */
 export async function deleteMediaAsset(prisma: PrismaClient, id: string): Promise<boolean> {
   const row = await prisma.mediaAsset.findUnique({ where: { id } });
   if (!row) return false;

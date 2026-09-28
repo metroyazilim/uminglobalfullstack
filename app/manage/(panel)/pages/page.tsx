@@ -23,13 +23,17 @@ const COLLECTIONS = [
 ] as const;
 
 export default async function PagesIndexPage() {
-  const [status, overrides, pageContents] = await Promise.all([
+  const [status, overrides, pageContents, customPages] = await Promise.all([
     getContentStatus(),
     prisma.pageSeo.findMany({
       select: { key: true, title: true, description: true, updatedAt: true },
     }),
     prisma.pageContent.findMany({
       select: { key: true, status: true, updatedAt: true },
+    }),
+    prisma.customPage.findMany({
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+      select: { id: true, slug: true, title: true, status: true, updatedAt: true },
     }),
   ]);
   const pageContentByKey = new Map(pageContents.map((content) => [content.key, content]));
@@ -44,7 +48,9 @@ export default async function PagesIndexPage() {
       <PageHeader
         eyebrow="Site Content"
         title="Pages"
-        description="Check what is driving the live site, then manage search and social metadata for every static page."
+        description="Check what is driving the live site, manage fixed page content, or create a new page from blocks."
+        actionHref="/manage/pages/custom/new"
+        actionLabel="New page"
       />
 
       <section className={cn(card, "overflow-hidden")} aria-labelledby="live-content-heading">
@@ -185,6 +191,31 @@ export default async function PagesIndexPage() {
           </tbody>
         </table>
       </div>
+
+      <section className={cn(card, "overflow-hidden")} aria-labelledby="custom-pages-heading">
+        <div className="flex items-center justify-between border-b border-brand-border px-5 py-4">
+          <div>
+            <h2 id="custom-pages-heading" className="text-sm font-bold text-brand-text">Custom pages</h2>
+            <p className="mt-1 text-xs text-brand-muted">Pages created in the admin panel, ready to publish and add to Navigation.</p>
+          </div>
+          <Link href="/manage/navigation" className="text-xs font-bold uppercase tracking-wider text-brand-primary hover:underline">Manage navigation</Link>
+        </div>
+        <div className="divide-y divide-brand-border">
+          {customPages.length === 0 ? <p className="px-5 py-4 text-sm text-brand-muted">No custom pages yet.</p> : customPages.map((page) => (
+            <div key={page.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3">
+              <div>
+                <p className="text-sm font-semibold text-brand-text">{page.title}</p>
+                <p className="mt-1 font-mono text-xs text-brand-muted">/pages/{page.slug}</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-brand-muted">{page.status.toLowerCase()}</span>
+                <Link href={`/manage/pages/custom/${page.id}`} className="text-xs font-bold uppercase tracking-wider text-brand-primary hover:underline">Edit</Link>
+                {page.status === "PUBLISHED" ? <Link href={`/pages/${page.slug}`} target="_blank" className="text-xs font-bold uppercase tracking-wider text-brand-muted hover:text-brand-text">View</Link> : null}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
 
       <div className={cn(card, "p-5 text-sm text-brand-muted")}>
         Team members, offices and Insights articles are managed from their own screens:{" "}

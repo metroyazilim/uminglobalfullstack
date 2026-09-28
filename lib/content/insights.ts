@@ -1,11 +1,9 @@
 import "server-only";
 import { prisma } from "@/lib/db";
 import { hasDatabase } from "@/lib/env";
-import { INSIGHTS, type Block, type InsightPost } from "@/components/insights";
+import type { Block, InsightPost } from "@/components/insights";
 
-/** Same resolution contract as `lib/content/team.ts`: no database → bundled
- * `components/insights.ts`; database with no published rows → bundled;
- * published rows → database wins outright. Errors degrade to bundled. */
+/** Published database rows are the only public source of insight content. */
 function toInsightPost(row: {
   slug: string;
   title: string;
@@ -47,14 +45,13 @@ function toInsightPost(row: {
 }
 
 export async function getInsights(): Promise<InsightPost[]> {
-  if (!hasDatabase()) return INSIGHTS;
+  if (!hasDatabase()) return [];
   try {
     const rows = await prisma.post.findMany({ where: { status: "PUBLISHED" }, orderBy: { date: "desc" } });
-    if (rows.length === 0) return INSIGHTS;
     return rows.map(toInsightPost);
   } catch (error) {
-    console.error("[content/insights] falling back to bundled insights content", error);
-    return INSIGHTS;
+    console.error("[content/insights] database content unavailable", error);
+    return [];
   }
 }
 

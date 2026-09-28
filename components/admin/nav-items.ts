@@ -1,6 +1,6 @@
-import { FileText, Images, LayoutDashboard, MapPin, MessagesSquare, ScrollText, Search, Settings, Users, type LucideIcon } from "lucide-react";
+import { FileText, Images, LayoutDashboard, MapPin, MessagesSquare, Network, ScrollText, Search, Settings, Users, type LucideIcon } from "lucide-react";
 
-export type AdminNavKey = "overview" | "pages" | "team" | "offices" | "posts" | "seo" | "messages" | "media" | "users" | "audit" | "settings";
+export type AdminNavKey = "overview" | "pages" | "navigation" | "team" | "offices" | "posts" | "seo" | "messages" | "media" | "users" | "audit" | "settings";
 
 export type AdminNavItem = Readonly<{
   key: AdminNavKey;
@@ -28,6 +28,7 @@ export const ADMIN_NAV_SECTIONS: readonly AdminNavSection[] = [
     title: "Content",
     items: [
       { key: "pages", label: "Pages", href: "/manage/pages", icon: FileText },
+      { key: "navigation", label: "Navigation", href: "/manage/navigation", icon: Network },
       { key: "team", label: "Team", href: "/manage/team", icon: Users, publicHref: "/team" },
       { key: "offices", label: "Offices", href: "/manage/offices", icon: MapPin, publicHref: "/offices" },
       { key: "posts", label: "Insights", href: "/manage/posts", icon: FileText, publicHref: "/insights" },

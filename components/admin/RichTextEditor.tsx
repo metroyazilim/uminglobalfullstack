@@ -72,7 +72,7 @@ export function RichTextEditor(props: RichTextEditorProps) {
     editorProps: {
       attributes: {
         class:
-          "tiptap min-h-40 px-3 py-2 text-sm leading-6 text-brand-text outline-none [&_a]:text-brand-primary [&_a]:underline [&_blockquote]:border-l-2 [&_blockquote]:border-brand-border [&_blockquote]:pl-3 [&_ol]:list-decimal [&_ol]:pl-6 [&_p+p]:mt-3 [&_ul]:list-disc [&_ul]:pl-6",
+          "tiptap min-h-28 px-3 py-2 text-sm leading-6 text-brand-text outline-none [&_a]:text-brand-primary [&_a]:underline [&_blockquote]:border-l-2 [&_blockquote]:border-brand-border [&_blockquote]:pl-3 [&_ol]:list-decimal [&_ol]:pl-6 [&_p+p]:mt-3 [&_ul]:list-disc [&_ul]:pl-6",
         "aria-label": props.label ?? "Rich text editor",
       },
     },
@@ -110,8 +110,8 @@ export function RichTextEditor(props: RichTextEditorProps) {
     <div>
       {props.label ? <span className={fieldLabel}>{props.label}</span> : null}
       {!controlled ? <input type="hidden" name={props.name} value={formValue} /> : null}
-      <div className="mt-1.5 overflow-hidden rounded-[var(--radius-sm)] border border-brand-border bg-brand-surface focus-within:border-brand-primary focus-within:ring-2 focus-within:ring-brand-primary/10">
-        <div className="flex flex-wrap items-center gap-1 border-b border-brand-border bg-brand-muted-surface/50 p-1.5">
+      <div className="mt-1.5 overflow-hidden rounded-none border border-brand-border bg-brand-surface focus-within:border-brand-primary focus-within:ring-2 focus-within:ring-brand-primary/10">
+        <div className="flex flex-wrap items-center gap-1 border-b border-brand-border bg-brand-muted-surface/50 p-1">
           <button
             type="button"
             className={cn(iconButton, toolbarState.bold && "bg-brand-muted-surface text-brand-primary")}

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { recordAudit, requireAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/db";
+import { slugify } from "@/lib/slug";
 
 export type PostActionState = {
   error?: string;
@@ -20,13 +21,13 @@ const identitySchema = z.object({
   id: z.string().min(1),
   version: z.coerce.number().int().nonnegative(),
 });
-
 const blockSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("lead"), text: z.string().min(1) }),
   z.object({ kind: z.literal("p"), text: z.string().min(1) }),
   z.object({ kind: z.literal("h2"), text: z.string().min(1) }),
   z.object({ kind: z.literal("list"), items: z.array(z.string().min(1)).min(1) }),
   z.object({ kind: z.literal("callout"), text: z.string().min(1) }),
+  z.object({ kind: z.literal("image"), src: z.string().trim().min(1), alt: z.string().trim().min(1), caption: z.string().trim().optional() }),
 ]);
 
 const bodySchema = z.array(blockSchema);
@@ -63,8 +64,10 @@ const postSchema = z.object({
     .string()
     .trim()
     .min(1, "Slug is required.")
-    .max(160)
-    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug must consist of lowercase letters, numbers, and hyphens."),
+    .max(240)
+    .transform(slugify)
+    .refine((value) => /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value), "Slug must contain lowercase letters, numbers, and hyphens.")
+    .refine((value) => value.length > 0, "Slug must contain at least one letter or number."),
   title: z.string().trim().min(1, "Title is required.").max(240),
   metaTitle: z.string().trim().min(1, "Meta title is required.").max(240),
   description: z.string().trim().min(1, "Description is required.").max(1000),
@@ -140,11 +143,12 @@ function revalidatePublicPost(slug: string): void {
 }
 
 async function savePost(input: ValidPostInput, status: Extract<ContentStatus, "PUBLISHED"> | undefined, userId: string): Promise<PostActionState> {
+  const slug = input.slug.startsWith("post-") ? slugify(input.title) || input.slug : input.slug;
   try {
     const result = await prisma.post.updateMany({
       where: { id: input.id, version: input.version },
       data: {
-        slug: input.slug,
+        slug,
         title: input.title,
         metaTitle: input.metaTitle,
         description: input.description,
@@ -166,9 +170,7 @@ async function savePost(input: ValidPostInput, status: Extract<ContentStatus, "P
       },
     });
 
-    if (result.count !== 1) {
-      return { error: "Post was modified in another session. Refresh the page and try again." };
-    }
+    if (result.count !== 1) return { error: "Post was modified in another session. Refresh the page and try again." };
 
     const version = input.version + 1;
     await recordAudit({
@@ -176,11 +178,10 @@ async function savePost(input: ValidPostInput, status: Extract<ContentStatus, "P
       entity: "Post",
       entityId: input.id,
       userId,
-      metadata: { slug: input.slug, ...(status ? { status } : {}), version },
+      metadata: { slug, ...(status ? { status } : {}), version },
     });
     revalidatePost(input.id);
-    revalidatePublicPost(input.slug);
-
+    revalidatePublicPost(slug);
     return {
       success: status === "PUBLISHED" ? "Post published." : "Draft saved.",
       id: input.id,

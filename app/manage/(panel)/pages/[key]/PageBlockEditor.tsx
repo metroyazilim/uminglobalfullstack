@@ -50,13 +50,13 @@ export function PageBlockEditor({ initialValue, name = "blocks" }: { initialValu
       <input type="hidden" name={name} value={JSON.stringify(blocks)} />
       {blocks.length === 0 ? <p className="rounded border border-dashed border-brand-border p-5 text-sm text-brand-muted">Henüz blok yok. Aşağıdan bir blok ekleyin.</p> : null}
       {blocks.map((block, index) => (
-        <section key={`${block.kind}-${index}`} className="rounded border border-brand-border bg-brand-surface p-5">
+        <section key={`${block.kind}-${index}`} className="border border-brand-border bg-brand-surface p-3">
           <div className="mb-4 flex items-center justify-between gap-3">
             <h3 className="font-bold text-brand-ink">{index + 1}. {PAGE_BLOCK_KIND_LABELS[block.kind]}</h3>
             <div className="flex gap-1">
-              <button type="button" className={iconButton} onClick={() => move(index, -1)} disabled={index === 0} aria-label="Move block up"><ArrowUp className="size-4" /></button>
-              <button type="button" className={iconButton} onClick={() => move(index, 1)} disabled={index === blocks.length - 1} aria-label="Move block down"><ArrowDown className="size-4" /></button>
-              <button type="button" className={iconButton} onClick={() => remove(index)} aria-label="Delete block"><Trash2 className="size-4" /></button>
+              <button type="button" className={`${iconButton} rounded-none`} onClick={() => move(index, -1)} disabled={index === 0} aria-label="Move block up"><ArrowUp className="size-4" /></button>
+              <button type="button" className={`${iconButton} rounded-none`} onClick={() => move(index, 1)} disabled={index === blocks.length - 1} aria-label="Move block down"><ArrowDown className="size-4" /></button>
+              <button type="button" className={`${iconButton} rounded-none`} onClick={() => remove(index)} aria-label="Delete block"><Trash2 className="size-4" /></button>
             </div>
           </div>
           {block.kind === "hero" ? (
@@ -129,7 +129,7 @@ export function PageBlockEditor({ initialValue, name = "blocks" }: { initialValu
         </section>
       ))}
       <div className="flex flex-wrap gap-2">
-        {BLOCK_KINDS.map((kind) => <button key={kind} type="button" className={secondaryButton} onClick={() => setBlocks((current) => [...current, emptyBlock(kind)])}><Plus className="size-4" />{PAGE_BLOCK_KIND_LABELS[kind]}</button>)}
+        {BLOCK_KINDS.map((kind) => <button key={kind} type="button" className={`${secondaryButton} rounded-none`} onClick={() => setBlocks((current) => [...current, emptyBlock(kind)])}><Plus className="size-4" />{PAGE_BLOCK_KIND_LABELS[kind]}</button>)}
       </div>
     </div>
   );
