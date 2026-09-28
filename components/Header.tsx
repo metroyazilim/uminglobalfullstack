@@ -42,8 +42,8 @@ export default function Header() {
             <Logo height={64} priority className="h-[26px] w-auto lg:h-[34px]" />
           </Link>
 
-          <nav className="hidden min-w-0 flex-1 lg:block lg:flex-none">
-            <ul className="flex items-center lg:justify-center">
+          <nav className="hidden min-w-0 flex-1 lg:block">
+            <ul className="flex items-center justify-center">
               {NAV_ITEMS.map((item) => (
                 <li key={item.label} className="shrink-0">
                   {"dropdown" in item ? (
