@@ -12,8 +12,9 @@ import { TEAM_MEMBERS } from "../components/teamMembers";
 import { OFFICES } from "../components/offices";
 import { INSIGHTS } from "../components/insights";
 import { SITE_SETTINGS_DEFAULTS } from "../lib/content/site-settings-defaults";
-import { PAGE_CONTENT_KEYS, SITE_PAGES } from "../lib/site-pages";
-import type { PageBlock } from "../lib/content/page-content";
+import { isPageContentKey, parsePageBlocks } from "../lib/content/page-content";
+import { PAGE_CONTENT_SEEDS, isPlaceholderPageBlocks } from "../lib/content/page-content-seeds";
+import { SITE_PAGES } from "../lib/site-pages";
 
 const prisma = new PrismaClient();
 
@@ -101,15 +102,23 @@ async function ensureSiteSettings(): Promise<void> {
 /** Creates editable draft blocks without changing the public fallback. */
 async function ensurePageContent(): Promise<number> {
   let created = 0;
+  let upgraded = 0;
   for (const page of SITE_PAGES) {
-    if (!(PAGE_CONTENT_KEYS as readonly string[]).includes(page.key)) continue;
-    const existing = await prisma.pageContent.findUnique({ where: { key: page.key }, select: { id: true } });
-    if (existing) continue;
-    const blocks: PageBlock[] = [{ kind: "hero", eyebrow: "UMIN Global", title: page.label, body: "" }];
-    await prisma.pageContent.create({ data: { key: page.key, blocks, status: "DRAFT" } });
+    if (!isPageContentKey(page.key)) continue;
+    const seed = PAGE_CONTENT_SEEDS[page.key];
+    const existing = await prisma.pageContent.findUnique({ where: { key: page.key }, select: { id: true, blocks: true } });
+    if (existing) {
+      const current = parsePageBlocks(existing.blocks);
+      if (current && isPlaceholderPageBlocks(page.label, current)) {
+        await prisma.pageContent.update({ where: { id: existing.id }, data: { blocks: seed } });
+        upgraded += 1;
+      }
+      continue;
+    }
+    await prisma.pageContent.create({ data: { key: page.key, blocks: seed, status: "DRAFT" } });
     created += 1;
   }
-  return created;
+  return created + upgraded;
 }
 
 async function main(): Promise<void> {

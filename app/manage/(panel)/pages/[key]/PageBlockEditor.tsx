@@ -4,6 +4,8 @@ import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import type { PageBlock } from "@/lib/content/page-content";
 import { PAGE_BLOCK_KIND_LABELS } from "@/lib/content/page-content";
+import { MediaField } from "@/components/admin/MediaField";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { fieldInput, fieldLabel, fieldTextarea, iconButton, secondaryButton } from "@/components/admin/ui";
 
 const BLOCK_KINDS = ["hero", "heading", "paragraph", "list", "cards", "stats", "image", "cta"] as const;
@@ -57,14 +59,73 @@ export function PageBlockEditor({ initialValue, name = "blocks" }: { initialValu
               <button type="button" className={iconButton} onClick={() => remove(index)} aria-label="Delete block"><Trash2 className="size-4" /></button>
             </div>
           </div>
-          {block.kind === "hero" ? <div className="grid gap-4 sm:grid-cols-2"><TextField label="Eyebrow" value={block.eyebrow ?? ""} onChange={(value) => replace(index, { ...block, eyebrow: value })} /><TextField label="Title" value={block.title} onChange={(value) => replace(index, { ...block, title: value })} /><div className="sm:col-span-2"><TextField label="Body" value={block.body ?? ""} onChange={(value) => replace(index, { ...block, body: value })} multiline /></div></div> : null}
-          {block.kind === "heading" ? <div className="grid gap-4 sm:grid-cols-2"><TextField label="Eyebrow" value={block.eyebrow ?? ""} onChange={(value) => replace(index, { ...block, eyebrow: value })} /><TextField label="Title" value={block.title} onChange={(value) => replace(index, { ...block, title: value })} /><div className="sm:col-span-2"><TextField label="Lead" value={block.lead ?? ""} onChange={(value) => replace(index, { ...block, lead: value })} multiline /></div></div> : null}
-          {block.kind === "paragraph" ? <TextField label="Paragraph" value={block.text} onChange={(value) => replace(index, { ...block, text: value })} multiline /> : null}
-          {block.kind === "list" ? <div className="space-y-4"><TextField label="Title" value={block.title ?? ""} onChange={(value) => replace(index, { ...block, title: value })} />{block.items.map((item, itemIndex) => <TextField key={itemIndex} label={`Item ${itemIndex + 1}`} value={item} onChange={(value) => replace(index, { ...block, items: block.items.map((current, currentIndex) => currentIndex === itemIndex ? value : current) })} />)}<button type="button" className={secondaryButton} onClick={() => replace(index, { ...block, items: [...block.items, ""] })}>Add item</button></div> : null}
-          {block.kind === "cards" ? <div className="space-y-4"><TextField label="Title" value={block.title ?? ""} onChange={(value) => replace(index, { ...block, title: value })} />{block.items.map((item, itemIndex) => <div key={itemIndex} className="grid gap-3 rounded border border-brand-border p-3 sm:grid-cols-2"><TextField label={`Card ${itemIndex + 1} title`} value={item.title} onChange={(value) => replace(index, { ...block, items: block.items.map((current, currentIndex) => currentIndex === itemIndex ? { ...current, title: value } : current) })} /><TextField label="Text" value={item.text} onChange={(value) => replace(index, { ...block, items: block.items.map((current, currentIndex) => currentIndex === itemIndex ? { ...current, text: value } : current) })} multiline /></div>)}<button type="button" className={secondaryButton} onClick={() => replace(index, { ...block, items: [...block.items, { title: "", text: "" }] })}>Add card</button></div> : null}
-          {block.kind === "stats" ? <div className="space-y-4">{block.items.map((item, itemIndex) => <div key={itemIndex} className="grid gap-3 sm:grid-cols-2"><TextField label={`Value ${itemIndex + 1}`} value={item.value} onChange={(value) => replace(index, { ...block, items: block.items.map((current, currentIndex) => currentIndex === itemIndex ? { ...current, value } : current) })} /><TextField label="Label" value={item.label} onChange={(label) => replace(index, { ...block, items: block.items.map((current, currentIndex) => currentIndex === itemIndex ? { ...current, label } : current) })} /></div>)}<button type="button" className={secondaryButton} onClick={() => replace(index, { ...block, items: [...block.items, { value: "", label: "" }] })}>Add stat</button></div> : null}
-          {block.kind === "image" ? <div className="grid gap-4 sm:grid-cols-2"><TextField label="Image URL" value={block.src} onChange={(value) => replace(index, { ...block, src: value })} /><TextField label="Alt text" value={block.alt} onChange={(value) => replace(index, { ...block, alt: value })} /><div className="sm:col-span-2"><TextField label="Caption" value={block.caption ?? ""} onChange={(value) => replace(index, { ...block, caption: value })} /></div></div> : null}
-          {block.kind === "cta" ? <div className="grid gap-4 sm:grid-cols-2"><TextField label="Title" value={block.title} onChange={(value) => replace(index, { ...block, title: value })} /><TextField label="Button label" value={block.label} onChange={(value) => replace(index, { ...block, label: value })} /><TextField label="URL" value={block.href} onChange={(value) => replace(index, { ...block, href: value })} /><TextField label="Text" value={block.text ?? ""} onChange={(value) => replace(index, { ...block, text: value })} multiline /></div> : null}
+          {block.kind === "hero" ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <TextField label="Eyebrow" value={block.eyebrow ?? ""} onChange={(value) => replace(index, { ...block, eyebrow: value })} />
+              <TextField label="Title" value={block.title} onChange={(value) => replace(index, { ...block, title: value })} />
+              <div className="sm:col-span-2">
+                <RichTextEditor label="Body" value={block.body ?? ""} onChange={(value) => replace(index, { ...block, body: value })} />
+              </div>
+            </div>
+          ) : null}
+          {block.kind === "heading" ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <TextField label="Eyebrow" value={block.eyebrow ?? ""} onChange={(value) => replace(index, { ...block, eyebrow: value })} />
+              <TextField label="Title" value={block.title} onChange={(value) => replace(index, { ...block, title: value })} />
+              <div className="sm:col-span-2">
+                <RichTextEditor label="Lead" value={block.lead ?? ""} onChange={(value) => replace(index, { ...block, lead: value })} />
+              </div>
+            </div>
+          ) : null}
+          {block.kind === "paragraph" ? <RichTextEditor label="Paragraph" value={block.text} onChange={(value) => replace(index, { ...block, text: value })} /> : null}
+          {block.kind === "list" ? (
+            <div className="space-y-4">
+              <TextField label="Title" value={block.title ?? ""} onChange={(value) => replace(index, { ...block, title: value })} />
+              {block.items.map((item, itemIndex) => <TextField key={itemIndex} label={`Item ${itemIndex + 1}`} value={item} onChange={(value) => replace(index, { ...block, items: block.items.map((current, currentIndex) => currentIndex === itemIndex ? value : current) })} />)}
+              <button type="button" className={secondaryButton} onClick={() => replace(index, { ...block, items: [...block.items, ""] })}>Add item</button>
+            </div>
+          ) : null}
+          {block.kind === "cards" ? (
+            <div className="space-y-4">
+              <TextField label="Title" value={block.title ?? ""} onChange={(value) => replace(index, { ...block, title: value })} />
+              {block.items.map((item, itemIndex) => (
+                <div key={itemIndex} className="grid gap-3 rounded border border-brand-border p-3 sm:grid-cols-2">
+                  <TextField label={`Card ${itemIndex + 1} title`} value={item.title} onChange={(value) => replace(index, { ...block, items: block.items.map((current, currentIndex) => currentIndex === itemIndex ? { ...current, title: value } : current) })} />
+                  <RichTextEditor label="Text" value={item.text} onChange={(value) => replace(index, { ...block, items: block.items.map((current, currentIndex) => currentIndex === itemIndex ? { ...current, text: value } : current) })} />
+                </div>
+              ))}
+              <button type="button" className={secondaryButton} onClick={() => replace(index, { ...block, items: [...block.items, { title: "", text: "" }] })}>Add card</button>
+            </div>
+          ) : null}
+          {block.kind === "stats" ? (
+            <div className="space-y-4">
+              {block.items.map((item, itemIndex) => <div key={itemIndex} className="grid gap-3 sm:grid-cols-2"><TextField label={`Value ${itemIndex + 1}`} value={item.value} onChange={(value) => replace(index, { ...block, items: block.items.map((current, currentIndex) => currentIndex === itemIndex ? { ...current, value } : current) })} /><TextField label="Label" value={item.label} onChange={(label) => replace(index, { ...block, items: block.items.map((current, currentIndex) => currentIndex === itemIndex ? { ...current, label } : current) })} /></div>)}
+              <button type="button" className={secondaryButton} onClick={() => replace(index, { ...block, items: [...block.items, { value: "", label: "" }] })}>Add stat</button>
+            </div>
+          ) : null}
+          {block.kind === "image" ? (
+            <div className="space-y-4">
+              <MediaField
+                name={`block-image-${index}`}
+                label="Image"
+                value={block.src}
+                onChange={({ url, altText }) => replace(index, { ...block, src: url, alt: block.alt || altText || "" })}
+                description="Choose an image from Media Library or upload one in the picker."
+              />
+              <TextField label="Alt text" value={block.alt} onChange={(value) => replace(index, { ...block, alt: value })} />
+              <TextField label="Caption" value={block.caption ?? ""} onChange={(value) => replace(index, { ...block, caption: value })} />
+            </div>
+          ) : null}
+          {block.kind === "cta" ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <TextField label="Title" value={block.title} onChange={(value) => replace(index, { ...block, title: value })} />
+              <TextField label="Button label" value={block.label} onChange={(value) => replace(index, { ...block, label: value })} />
+              <TextField label="URL" value={block.href} onChange={(value) => replace(index, { ...block, href: value })} />
+              <div className="sm:col-span-2">
+                <RichTextEditor label="Text" value={block.text ?? ""} onChange={(value) => replace(index, { ...block, text: value })} />
+              </div>
+            </div>
+          ) : null}
         </section>
       ))}
       <div className="flex flex-wrap gap-2">

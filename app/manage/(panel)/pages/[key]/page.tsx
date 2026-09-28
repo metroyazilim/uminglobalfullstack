@@ -3,6 +3,7 @@ import { PageHeader } from "@/components/admin/PageHeader";
 import { card, helpText, pageShell } from "@/components/admin/ui";
 import { requireAdmin } from "@/lib/admin-auth";
 import { parsePageBlocks } from "@/lib/content/page-content";
+import { PAGE_CONTENT_SEEDS, isPlaceholderPageBlocks } from "@/lib/content/page-content-seeds";
 import { prisma } from "@/lib/db";
 import { findSitePage, isPageContentKey } from "@/lib/site-pages";
 import { PageContentEditor } from "./PageContentEditor";
@@ -19,7 +20,8 @@ export default async function PageContentEditPage({ params }: { params: Params }
   if (!page) notFound();
 
   const row = await prisma.pageContent.findUnique({ where: { key } });
-  const blocks = row ? parsePageBlocks(row.blocks) ?? [] : [];
+  const storedBlocks = row ? parsePageBlocks(row.blocks) ?? [] : [];
+  const blocks = isPlaceholderPageBlocks(page.label, storedBlocks) ? PAGE_CONTENT_SEEDS[key] : storedBlocks;
 
   return (
     <div className={pageShell}>

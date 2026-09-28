@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { RichText } from "@/components/RichText";
 import { getPublishedPageBlocks } from "@/lib/content/page-source";
 import type { PageBlock } from "@/lib/content/page-content";
 import type { PageContentKey } from "@/lib/site-pages";
@@ -12,7 +13,7 @@ function Block({ block }: { block: PageBlock }) {
           <div className="mx-auto max-w-6xl">
             {block.eyebrow ? <p className="mb-4 text-xs font-bold uppercase tracking-[0.24em] text-brand-gold">{block.eyebrow}</p> : null}
             <h1 className="max-w-4xl text-4xl font-semibold tracking-tight sm:text-6xl">{block.title}</h1>
-            {block.body ? <p className="mt-6 max-w-2xl text-lg leading-8 text-white/75">{block.body}</p> : null}
+            {block.body ? <RichText html={block.body} className="mt-6 max-w-2xl text-lg leading-8 text-white/75 [&_p+p]:mt-4" /> : null}
           </div>
         </section>
       );
@@ -21,11 +22,11 @@ function Block({ block }: { block: PageBlock }) {
         <section className="mx-auto max-w-6xl px-6 py-16 sm:px-10 lg:px-16">
           {block.eyebrow ? <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-gold">{block.eyebrow}</p> : null}
           <h2 className="mt-3 max-w-4xl text-3xl font-semibold tracking-tight text-brand-ink sm:text-5xl">{block.title}</h2>
-          {block.lead ? <p className="mt-5 max-w-3xl text-lg leading-8 text-brand-muted">{block.lead}</p> : null}
+          {block.lead ? <RichText html={block.lead} className="mt-5 max-w-3xl text-lg leading-8 text-brand-muted [&_p+p]:mt-4" /> : null}
         </section>
       );
     case "paragraph":
-      return <p className="mx-auto max-w-3xl px-6 py-5 text-lg leading-8 text-brand-muted sm:px-10 lg:px-16">{block.text}</p>;
+      return <RichText html={block.text} className="mx-auto max-w-3xl px-6 py-5 text-lg leading-8 text-brand-muted sm:px-10 lg:px-16 [&_p+p]:mt-4" />;
     case "list":
       return (
         <section className="mx-auto max-w-6xl px-6 py-8 sm:px-10 lg:px-16">
@@ -43,7 +44,7 @@ function Block({ block }: { block: PageBlock }) {
             {block.items.map((item) => (
               <article key={`${item.title}-${item.text}`} className="rounded border border-brand-border bg-brand-surface p-6">
                 <h3 className="text-xl font-semibold text-brand-ink">{item.title}</h3>
-                <p className="mt-3 leading-7 text-brand-muted">{item.text}</p>
+                <RichText html={item.text} className="mt-3 leading-7 text-brand-muted [&_p+p]:mt-3" />
               </article>
             ))}
           </div>
@@ -71,7 +72,7 @@ function Block({ block }: { block: PageBlock }) {
         <section className="mx-auto max-w-6xl px-6 py-16 sm:px-10 lg:px-16">
           <div className="rounded bg-brand-ink px-6 py-10 text-white sm:px-10">
             <h2 className="text-3xl font-semibold">{block.title}</h2>
-            {block.text ? <p className="mt-3 max-w-2xl leading-7 text-white/75">{block.text}</p> : null}
+            {block.text ? <RichText html={block.text} className="mt-3 max-w-2xl leading-7 text-white/75 [&_p+p]:mt-3" /> : null}
             <Link href={block.href} className="mt-6 inline-flex rounded bg-brand-gold px-5 py-3 text-sm font-bold text-brand-ink">{block.label}</Link>
           </div>
         </section>
