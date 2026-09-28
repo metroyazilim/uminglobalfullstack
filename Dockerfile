@@ -2,9 +2,10 @@
 
 # UMIN Global — production image for Docker Compose / Dokploy.
 #
-# Three stages so the runtime image carries only the standalone server bundle,
-# the Prisma client/engines and the Prisma CLI needed to apply migrations on
-# boot. Build-time NEXT_PUBLIC_* values are baked in by `next build`, so they
+# Four stages so the runtime image carries the standalone server bundle plus a
+# production-only Prisma CLI (client, engines and every transitive runtime
+# dependency, resolved from the lockfile - see the `prod-deps` stage below).
+# Build-time NEXT_PUBLIC_* values are baked in by `next build`, so they
 # arrive as build args; every secret (database, SMTP, R2) stays runtime-only.
 
 FROM node:22-alpine AS base
@@ -17,6 +18,21 @@ FROM base AS deps
 COPY package.json package-lock.json ./
 COPY prisma ./prisma
 RUN npm ci
+
+# ----------------------------------------------------------------- prod-deps
+# `prisma migrate deploy` is invoked directly by the entrypoint - it is never
+# imported by application code, so Next's standalone output tracing (below)
+# never bundles it or its dependency tree. Previously this stage cherry-picked
+# `node_modules/{prisma,@prisma,.prisma}` out of the full dev install, which
+# silently broke when Prisma 6.19 added `@prisma/config`, pulling in `effect`,
+# `c12`, `deepmerge-ts` and `empathic` as siblings under top-level
+# `node_modules/` that were never copied ("Cannot find module 'effect'" at
+# container boot). `prisma` now lives in `dependencies` (package.json), so a
+# plain lockfile-driven `npm ci --omit=dev` resolves and flattens its entire
+# runtime closure correctly - no hand-picked folder list to drift again.
+FROM base AS prod-deps
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev --ignore-scripts
 
 # --------------------------------------------------------------------- builder
 FROM base AS builder
@@ -47,9 +63,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # Prisma schema, migrations, client and CLI so the entrypoint can run
 # `prisma migrate deploy` before the server accepts traffic.
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=prod-deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 
 COPY --chown=nextjs:nodejs docker/entrypoint.sh /app/docker/entrypoint.sh
 RUN chmod +x /app/docker/entrypoint.sh
