@@ -14,9 +14,10 @@ import Reveal from "@/components/Reveal";
 import JsonLd from "@/components/JsonLd";
 import { RichText } from "@/components/RichText";
 import { SITE_URL, absoluteUrl } from "@/components/seo";
-import { breadcrumbJsonLd } from "@/components/structuredData";
+import { breadcrumbJsonLd, personJsonLd } from "@/components/structuredData";
 import type { Block } from "@/components/insights";
 import { getInsight, getInsightSlugs } from "@/lib/content/insights";
+import { getTeamMember } from "@/lib/content/team";
 
 // One route for every published database article. Slugs and content are managed from the admin panel.
 export async function generateStaticParams() {
@@ -33,20 +34,25 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const post = await getInsight(slug);
   if (!post) return {};
 
+  const author = post.authorSlug ? await getTeamMember(post.authorSlug) : undefined;
   const url = `/insights/${post.slug}`;
   return {
     title: `${post.metaTitle} | UMIN Global`,
     description: post.description,
     keywords: post.keywords,
+    ...(author ? { authors: [{ name: author.name, url: `/team/${author.slug}` }] } : {}),
     alternates: { canonical: url },
     openGraph: {
       type: "article",
+      // A page-level openGraph object replaces the layout's, so these have to be repeated.
+      siteName: "UMIN Global",
+      locale: "en_US",
       title: post.title,
       description: post.description,
       url,
       publishedTime: post.date,
       modifiedTime: post.updated ?? post.date,
-      authors: ["UMIN Global"],
+      authors: [author ? absoluteUrl(`/team/${author.slug}`) : "UMIN Global"],
     },
     twitter: { card: "summary_large_image", title: post.title, description: post.description },
   };
@@ -95,12 +101,14 @@ export default async function InsightArticlePage({ params }: { params: Promise<{
   if (!post) notFound();
 
   const url = absoluteUrl(`/insights/${post.slug}`);
+  const author = post.authorSlug ? await getTeamMember(post.authorSlug) : undefined;
 
   const articleJsonLd = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     "@id": `${url}#article`,
     headline: post.title,
+    mainEntityOfPage: url,
     description: post.description,
     url,
     wordCount: post.body.reduce(
@@ -109,10 +117,15 @@ export default async function InsightArticlePage({ params }: { params: Promise<{
     ),
     articleSection: post.topic,
     timeRequired: `PT${post.readingMinutes}M`,
-    author: { "@type": "Organization", name: "UMIN Global", url: SITE_URL },
+    datePublished: post.date,
+    // `updated` is free text in the editor; only an ISO date is a valid dateModified.
+    dateModified: post.updated && /^\d{4}-\d{2}-\d{2}/.test(post.updated) ? post.updated : post.date,
+    author: author ? personJsonLd(author) : { "@type": "Organization", name: "UMIN Global", url: SITE_URL },
     publisher: { "@id": `${SITE_URL}/#organization` },
     isPartOf: { "@id": `${SITE_URL}/#website` },
-    image: `${url}/opengraph-image`,
+    image: [`${url}/opengraph-image`, ...(/^https?:\/\//.test(post.image) ? [post.image] : [])],
+    ...(post.keywords.length ? { keywords: post.keywords.join(", ") } : {}),
+    inLanguage: "en",
   };
 
   return (
@@ -131,7 +144,7 @@ export default async function InsightArticlePage({ params }: { params: Promise<{
             title={post.title}
             breadcrumbLabel="Article"
             breadcrumbParent={{ label: "Insights", href: "/insights" }}
-            kicker={`Published ${post.dateDisplay} by UMIN Global · ${post.readingMinutes} min read`}
+            kicker={`Published ${post.dateDisplay} by ${author?.name ?? "UMIN Global"} · ${post.readingMinutes} min read`}
           />
 
           <Section space="lg">
@@ -187,7 +200,7 @@ export default async function InsightArticlePage({ params }: { params: Promise<{
                       <BlogPostShareRow />
                     </div>
                     <div className="pt-10">
-                      <BlogPostAuthor />
+                      <BlogPostAuthor author={author} />
                     </div>
                   </div>
                 </article>

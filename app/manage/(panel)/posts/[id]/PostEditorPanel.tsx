@@ -52,11 +52,14 @@ export type PostEditorData = {
   ogSubtitle: string;
   body: Block[];
   related: RelatedLink[];
+  authorSlug: string;
 };
+
+export type AuthorOption = { slug: string; name: string };
 
 const initialActionState: PostActionState = {};
 
-export function PostEditorPanel({ post }: { post: PostEditorData }) {
+export function PostEditorPanel({ post, authors }: { post: PostEditorData; authors: AuthorOption[] }) {
   const router = useRouter();
   const { toast } = useToast();
   const [version, setVersion] = useState(post.version);
@@ -177,6 +180,18 @@ export function PostEditorPanel({ post }: { post: PostEditorData }) {
             <label>
               <span className={fieldLabel}>Topic</span>
               <input name="topic" defaultValue={post.topic} className={fieldInput} required />
+            </label>
+            <label>
+              <span className={fieldLabel}>Author</span>
+              <select name="authorSlug" defaultValue={post.authorSlug} className={fieldInput}>
+                <option value="">UMIN Global (organisation)</option>
+                {authors.map((author) => (
+                  <option key={author.slug} value={author.slug}>
+                    {author.name}
+                  </option>
+                ))}
+              </select>
+              <span className={fieldHint}>Credits a team member in the byline and the article’s structured data.</span>
             </label>
             <label>
               <span className={fieldLabel}>Publication date</span>

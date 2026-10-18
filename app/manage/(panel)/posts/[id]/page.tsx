@@ -10,6 +10,7 @@ const blockSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("h2"), text: z.string() }),
   z.object({ kind: z.literal("list"), items: z.array(z.string()) }),
   z.object({ kind: z.literal("callout"), text: z.string() }),
+  z.object({ kind: z.literal("image"), src: z.string(), alt: z.string(), caption: z.string().optional() }),
 ]);
 const bodySchema = z.array(blockSchema);
 const keywordsSchema = z.array(z.string());
@@ -20,7 +21,14 @@ type Params = Promise<{ id: string }>;
 export default async function PostEditorPage({ params }: { params: Params }) {
   await requireAdmin();
   const { id } = await params;
-  const post = await prisma.post.findUnique({ where: { id } });
+  const [post, authors] = await Promise.all([
+    prisma.post.findUnique({ where: { id } }),
+    prisma.teamMember.findMany({
+      where: { status: { not: "ARCHIVED" } },
+      select: { slug: true, name: true },
+      orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+    }),
+  ]);
   if (!post) notFound();
 
   const body = bodySchema.safeParse(post.body);
@@ -51,7 +59,9 @@ export default async function PostEditorPage({ params }: { params: Params }) {
         ogSubtitle: post.ogSubtitle,
         body: body.success ? body.data : [],
         related: related.success ? related.data : [],
+        authorSlug: post.authorSlug ?? "",
       }}
+      authors={authors.filter((author) => author.name.trim() !== "")}
     />
   );
 }

@@ -32,7 +32,17 @@ const teamMemberSchema = z.object({
   bioShort: z.string().trim(),
   bio: z.array(z.string()),
   worksOn: z.array(worksOnItemSchema),
+  sameAs: z.array(z.string().trim().url("Each profile link must be a full URL (https://…).")),
+  knowsAbout: z.array(z.string().trim().min(1)),
 });
+
+/** One entry per line; blank lines are dropped. */
+function lines(value: string): string[] {
+  return value
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
 
 
 function formText(formData: FormData, name: string): string {
@@ -58,6 +68,8 @@ function parseTeamMemberForm(formData: FormData) {
     bioShort: formText(formData, "bioShort"),
     bio: parseJson(formText(formData, "bio")),
     worksOn: parseJson(formText(formData, "worksOn")),
+    sameAs: lines(formText(formData, "sameAs")),
+    knowsAbout: lines(formText(formData, "knowsAbout")),
   });
 }
 

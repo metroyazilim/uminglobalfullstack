@@ -6,8 +6,9 @@ import PageHeroBanner from "@/components/PageHeroBanner";
 import CtaBanner from "@/components/CtaBanner";
 import TeamMemberProfile from "@/components/TeamMemberProfile";
 import JsonLd from "@/components/JsonLd";
-import { breadcrumbJsonLd } from "@/components/structuredData";
+import { breadcrumbJsonLd, personJsonLd } from "@/components/structuredData";
 import { getTeamMember, getTeamSlugs } from "@/lib/content/team";
+import { getInsightsByAuthor } from "@/lib/content/insights";
 import { SITE_URL, absoluteUrl } from "@/components/seo";
 
 export const revalidate = 300;
@@ -33,7 +34,17 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title,
     description: member.bioShort,
     alternates: { canonical: url },
-    openGraph: { type: "profile", title, description: member.bioShort, url },
+    openGraph: {
+      type: "profile",
+      // A page-level openGraph object replaces the layout's, so these have to be repeated.
+      siteName: "UMIN Global",
+      locale: "en_US",
+      title,
+      description: member.bioShort,
+      url,
+      firstName: member.name.split(" ").slice(0, -1).join(" "),
+      lastName: member.name.split(" ").slice(-1)[0],
+    },
     twitter: { card: "summary_large_image", title, description: member.bioShort },
   };
 }
@@ -44,22 +55,25 @@ export default async function TeamMemberPage({ params }: { params: Promise<{ slu
   if (!member) notFound();
 
   const url = absoluteUrl(`/team/${member.slug}`);
+  const articles = await getInsightsByAuthor(member.slug);
 
   return (
     <>
+      {/* ProfilePage is the type Google reads for a page about one person; the Person node is
+          shared with the byline of every article this member wrote (see personJsonLd). */}
       <JsonLd
         data={{
           "@context": "https://schema.org",
-          "@type": "Person",
-          "@id": `${url}#person`,
-          name: member.name,
-          jobTitle: member.role,
-          description: member.bioShort,
+          "@type": "ProfilePage",
+          "@id": `${url}#page`,
           url,
-          image: `${SITE_URL}${member.photo}`,
-          worksFor: { "@id": `${SITE_URL}/#organization` },
-          knowsAbout: member.worksOn.map((item) => item.label),
-          email: "info@uminglobal.com",
+          name: `${member.name}, ${member.role}`,
+          inLanguage: "en",
+          isPartOf: { "@id": `${SITE_URL}/#website` },
+          mainEntity: { ...personJsonLd(member), email: "info@uminglobal.com" },
+          ...(articles.length
+            ? { hasPart: articles.map((post) => ({ "@id": `${absoluteUrl(`/insights/${post.slug}`)}#article` })) }
+            : {}),
         }}
       />
       <JsonLd
@@ -77,7 +91,7 @@ export default async function TeamMemberPage({ params }: { params: Promise<{ slu
             kicker={member.role}
             breadcrumbParent={{ label: "Team", href: "/team" }}
           />
-          <TeamMemberProfile member={member} />
+          <TeamMemberProfile member={member} articles={articles} />
           <CtaBanner />
         </main>
         <Footer />

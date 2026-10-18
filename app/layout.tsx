@@ -85,7 +85,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     legalName: settings.legalName,
     identifier: { "@type": "PropertyValue", name: "ABN", value: "29 615 356 539" },
     url: SITE_URL,
-    logo: `${SITE_URL}/icon`,
+    logo: `${SITE_URL}/icon.png`,
     image: `${SITE_URL}/opengraph-image`,
     slogan: settings.slogan,
     description: settings.description,

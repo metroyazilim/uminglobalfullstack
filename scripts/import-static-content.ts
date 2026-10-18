@@ -28,6 +28,8 @@ async function importTeam(): Promise<number> {
       bioShort: member.bioShort,
       bio: member.bio,
       worksOn: member.worksOn,
+      sameAs: member.sameAs ?? [],
+      knowsAbout: member.knowsAbout ?? [],
       sortOrder: index,
       status: "PUBLISHED" as const,
     };

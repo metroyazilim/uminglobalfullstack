@@ -10,6 +10,7 @@ import TeamCard from "@/components/TeamCard";
 import { getTeamMembers } from "@/lib/content/team";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbJsonLd, collectionPageJsonLd } from "@/components/structuredData";
+import { absoluteUrl } from "@/components/seo";
 
 const TITLE = "Our Team | UMIN Global";
 const DESCRIPTION =
@@ -43,6 +44,7 @@ export default async function TeamPage() {
       name: member.name,
       path: `/team/${member.slug}`,
       description: member.role,
+      id: `${absoluteUrl(`/team/${member.slug}`)}#person`,
     })),
   });
   return (

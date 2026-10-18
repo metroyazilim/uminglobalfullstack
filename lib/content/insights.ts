@@ -22,6 +22,7 @@ function toInsightPost(row: {
   ogSubtitle: string;
   body: unknown;
   related: unknown;
+  authorSlug: string | null;
 }): InsightPost {
   return {
     slug: row.slug,
@@ -41,6 +42,7 @@ function toInsightPost(row: {
     ogSubtitle: row.ogSubtitle,
     body: Array.isArray(row.body) ? (row.body as Block[]) : [],
     related: Array.isArray(row.related) ? (row.related as { label: string; href: string }[]) : [],
+    ...(row.authorSlug ? { authorSlug: row.authorSlug } : {}),
   };
 }
 
@@ -70,4 +72,10 @@ export async function getInsightSlugs(): Promise<string[]> {
 export async function getOtherInsights(slug?: string, limit = 3): Promise<InsightPost[]> {
   const posts = await getInsights();
   return posts.filter((post) => post.slug !== slug).slice(0, limit);
+}
+
+/** Newest first, every published article credited to one team member. */
+export async function getInsightsByAuthor(authorSlug: string): Promise<InsightPost[]> {
+  const posts = await getInsights();
+  return posts.filter((post) => post.authorSlug === authorSlug);
 }

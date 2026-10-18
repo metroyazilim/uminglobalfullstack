@@ -88,6 +88,11 @@ const postSchema = z.object({
   ogSubtitle: z.string().trim().min(1, "Social subtitle is required.").max(500),
   body: z.string().transform(parseJson).pipe(bodySchema),
   related: z.string().transform(parseJson).pipe(relatedSchema),
+  authorSlug: z
+    .string()
+    .trim()
+    .max(240)
+    .transform((value) => value || null),
 });
 
 type ValidPostInput = z.infer<typeof postSchema>;
@@ -118,6 +123,7 @@ function postInput(formData: FormData): Record<keyof z.input<typeof postSchema>,
     ogSubtitle: formValue(formData, "ogSubtitle"),
     body: formValue(formData, "body"),
     related: formValue(formData, "related"),
+    authorSlug: formValue(formData, "authorSlug"),
   };
 }
 
@@ -165,6 +171,7 @@ async function savePost(input: ValidPostInput, status: Extract<ContentStatus, "P
         ogSubtitle: input.ogSubtitle,
         body: input.body,
         related: input.related,
+        authorSlug: input.authorSlug,
         ...(status ? { status } : {}),
         version: { increment: 1 },
       },

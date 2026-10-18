@@ -39,6 +39,8 @@ export interface InsightPost {
   body: Block[];
   /** Pages the article actually refers to. Rendered as a "Related" block. */
   related: { label: string; href: string }[];
+  /** Team member slug credited as author; absent credits UMIN Global. */
+  authorSlug?: string;
 }
 
 export const INSIGHTS: InsightPost[] = [

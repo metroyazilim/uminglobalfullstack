@@ -39,6 +39,8 @@ type TeamMemberEditorData = {
   bioShort: string;
   bio: unknown;
   worksOn: unknown;
+  sameAs: unknown;
+  knowsAbout: unknown;
   status: string;
   version: number;
 };
@@ -47,6 +49,10 @@ const INITIAL_ACTION_STATE: ActionState = {};
 
 function readBio(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((paragraph): paragraph is string => typeof paragraph === "string") : [];
+}
+
+function readLines(value: unknown): string {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string").join("\n") : "";
 }
 
 function readWorksOn(value: unknown): WorksOnItem[] {
@@ -144,6 +150,28 @@ export function TeamEditorPanel({ member }: { member: TeamMemberEditorData }) {
             <label className={`${fieldLabel} md:col-span-2`}>
               Short bio
               <textarea name="bioShort" defaultValue={member.bioShort} rows={3} className={fieldTextarea} />
+            </label>
+            <label className={fieldLabel}>
+              Profile links (sameAs)
+              <textarea
+                name="sameAs"
+                defaultValue={readLines(member.sameAs)}
+                rows={3}
+                className={fieldTextarea}
+                placeholder="https://www.linkedin.com/in/…"
+              />
+              <span className={fieldHint}>One URL per line. Tells search engines these profiles are the same person.</span>
+            </label>
+            <label className={fieldLabel}>
+              Expertise (knowsAbout)
+              <textarea
+                name="knowsAbout"
+                defaultValue={readLines(member.knowsAbout)}
+                rows={3}
+                className={fieldTextarea}
+                placeholder="Technical SEO"
+              />
+              <span className={fieldHint}>One topic per line. Added to the focus area titles in structured data.</span>
             </label>
           </div>
         </section>

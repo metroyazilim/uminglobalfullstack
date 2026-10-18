@@ -11,6 +11,10 @@ export interface TeamMember {
   bio: string[];
   /** Capability pages this person owns - linked from the profile page. */
   worksOn: { label: string; href: string }[];
+  /** The same person's profiles elsewhere - emitted as Person `sameAs`. */
+  sameAs?: string[];
+  /** Expertise beyond the capability pages - emitted as Person `knowsAbout`. */
+  knowsAbout?: string[];
 }
 
 export const ANTHON: TeamMember = {
@@ -39,21 +43,37 @@ export const BERAT: TeamMember = {
   slug: "muhammet-berat-arslan",
   name: "Muhammet Berat Arslan",
   role: "Chief Technology Officer",
-  photo: "/team/muhammet-berat-arslan.png",
+  photo: "/team/muhammet-berat-arslan.jpg",
   photoAlt: "Muhammet Berat Arslan, Chief Technology Officer of UMIN Global",
   bioShort:
-    "Owns technology and digital development: architecture, the AI systems in production, and the standard every build is delivered to.",
+    "Software developer and CTO of UMIN Global. Leads architecture, technical SEO, custom admin systems and the AI systems UMIN puts into production.",
   bio: [
-    "Muhammet Berat Arslan is UMIN Global's Chief Technology Officer and heads technology and digital development. Architecture, the engineering standard and what actually goes to production are his decisions.",
+    "Muhammet Berat Arslan is a software developer and UMIN Global's Chief Technology Officer. He heads technology and digital development: architecture, the engineering standard and what actually goes to production are his decisions.",
+    "His speciality is the part of a website most teams leave until after launch - technical SEO. Crawlable server-rendered pages, canonical URLs, XML sitemaps, structured data (Organization, Person, BlogPosting, BreadcrumbList) and Core Web Vitals are designed into the build from the first commit, not bolted on by an agency months later.",
+    "He builds the systems behind that standard himself: custom admin panels that let each team publish its own content, media infrastructure on Cloudflare R2, and Next.js and PostgreSQL platforms such as <a href=\"https://wpfuk.org\">wpfuk.org</a> and <a href=\"https://kadiklondon.org\">kadiklondon.org</a>.",
     "He works on the same principle the company sells: a system is only worth building if someone can state what it costs the business today and what changes once it ships. That applies to a SaaS platform, an AI agent taking real support volume, and the automation nobody sees.",
-    "In practice that means he is in the technical detail on every engagement - the data model, the integrations, the AI workflows and the release process - rather than reviewing it after a delivery team has already decided.",
   ],
   worksOn: [
     { label: "Technology & AI", href: "/technology-ai" },
-    { label: "UMIN AI", href: "/umin-ai" },
+    { label: "SEO", href: "/services/seo" },
+    { label: "Website Design & Development", href: "/services/website-design-development" },
     { label: "Custom Software Development", href: "/services/custom-software-development" },
     { label: "AI Agents", href: "/services/ai-agents" },
     { label: "Cloud Solutions", href: "/services/cloud-solutions" },
+  ],
+  sameAs: ["https://www.linkedin.com/in/arslanberatt"],
+  knowsAbout: [
+    "Technical SEO",
+    "Search engine optimization",
+    "Structured data",
+    "Core Web Vitals",
+    "Next.js",
+    "React",
+    "TypeScript",
+    "PostgreSQL",
+    "Cloudflare R2",
+    "Content management systems",
+    "Software architecture",
   ],
 };
 

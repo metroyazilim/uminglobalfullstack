@@ -71,20 +71,25 @@ enum ContentStatus {
 /// transform layer. Not read by the public site today — see AGENTS note in
 /// app/manage/(panel)/team/actions.ts.
 model TeamMember {
-  id        String        @id @default(cuid())
-  slug      String        @unique
-  name      String
-  role      String
-  photo     String
-  photoAlt  String
-  bioShort  String
-  bio       Json
-  worksOn   Json
-  sortOrder Int           @default(0)
-  status    ContentStatus @default(DRAFT)
-  version   Int           @default(0)
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  id         String        @id @default(cuid())
+  slug       String        @unique
+  name       String
+  role       String
+  photo      String
+  photoAlt   String
+  bioShort   String
+  bio        Json
+  worksOn    Json
+  /// Profile URLs that identify the same person elsewhere (LinkedIn, GitHub …).
+  /// Emitted as Person `sameAs` so search engines can join the entity.
+  sameAs     Json          @default("[]")
+  /// Topics emitted as Person `knowsAbout`, in addition to the worksOn labels.
+  knowsAbout Json          @default("[]")
+  sortOrder  Int           @default(0)
+  status     ContentStatus @default(DRAFT)
+  version    Int           @default(0)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
 
   @@index([status, sortOrder])
 }
@@ -131,6 +136,8 @@ model Post {
   ogSubtitle     String
   body           Json
   related        Json
+  /// Slug of the TeamMember credited as author. Null credits the organisation.
+  authorSlug     String?
   status         ContentStatus @default(DRAFT)
   version        Int           @default(0)
   createdAt      DateTime      @default(now())
@@ -204,48 +211,48 @@ model MediaAsset {
 /// blank out a title or description).
 /// Custom pages created from the admin panel. Their route is `/pages/:slug`.
 model CustomPage {
-  id             String           @id @default(cuid())
-  slug           String           @unique
+  id             String          @id @default(cuid())
+  slug           String          @unique
   title          String
   blocks         Json
-  status         ContentStatus    @default(DRAFT)
-  version        Int              @default(0)
-  sortOrder      Int              @default(0)
+  status         ContentStatus   @default(DRAFT)
+  version        Int             @default(0)
+  sortOrder      Int             @default(0)
   navigationItem NavigationItem?
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 
   @@index([status, sortOrder])
 }
 
 /// Editable public navigation tree. Only root items count toward the seven-item limit.
 model NavigationItem {
-  id         String          @id @default(cuid())
-  label      String
-  href       String
-  sortOrder  Int             @default(0)
-  parentId   String?
-  parent     NavigationItem?  @relation("NavigationTree", fields: [parentId], references: [id], onDelete: Cascade)
-  children   NavigationItem[] @relation("NavigationTree")
-  customPageId String?       @unique
-  customPage CustomPage?     @relation(fields: [customPageId], references: [id], onDelete: SetNull)
-  createdAt  DateTime        @default(now())
-  updatedAt  DateTime        @updatedAt
+  id           String           @id @default(cuid())
+  label        String
+  href         String
+  sortOrder    Int              @default(0)
+  parentId     String?
+  parent       NavigationItem?  @relation("NavigationTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children     NavigationItem[] @relation("NavigationTree")
+  customPageId String?          @unique
+  customPage   CustomPage?      @relation(fields: [customPageId], references: [id], onDelete: SetNull)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
 
   @@index([parentId, sortOrder])
 }
 
 model PageSeo {
-  id             String   @id @default(cuid())
-  key            String   @unique
-  title          String?
-  description    String?
-  ogTitle        String?
-  ogDescription  String?
-  ogImage        String?
-  updatedById    String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id            String   @id @default(cuid())
+  key           String   @unique
+  title         String?
+  description   String?
+  ogTitle       String?
+  ogDescription String?
+  ogImage       String?
+  updatedById   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 /// Site-wide organisation facts behind the Organization/WebSite JSON-LD in

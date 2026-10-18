@@ -29,7 +29,7 @@ interface CollectionArgs {
   name: string;
   description: string;
   /** Ordered entries of the listing. `type` is the schema type of the thing being listed. */
-  items: { name: string; path: string; description?: string }[];
+  items: { name: string; path: string; description?: string; id?: string }[];
   itemType?: "WebPage" | "Service" | "LocalBusiness" | "Person" | "BlogPosting";
   /** Blog index uses `Blog`; the others are collections of pages. */
   pageType?: "CollectionPage" | "Blog" | "AboutPage" | "ContactPage";
@@ -63,7 +63,16 @@ export function collectionPageJsonLd({
         name: item.name,
         url: absoluteUrl(item.path),
         ...(item.description
-          ? { item: { "@type": itemType, name: item.name, description: item.description, url: absoluteUrl(item.path) } }
+          ? {
+              item: {
+                "@type": itemType,
+                // Reusing the node's own `@id` makes the listing and the detail page one entity.
+                ...(item.id ? { "@id": item.id } : {}),
+                name: item.name,
+                description: item.description,
+                url: absoluteUrl(item.path),
+              },
+            }
           : {}),
       })),
     },
@@ -93,5 +102,40 @@ export function webPageJsonLd({
     isPartOf: { "@id": `${SITE_URL}/#website` },
     about: { "@id": `${SITE_URL}/#organization` },
     publisher: { "@id": `${SITE_URL}/#organization` },
+  };
+}
+
+type PersonSource = {
+  slug: string;
+  name: string;
+  role: string;
+  bioShort: string;
+  photo: string;
+  worksOn: { label: string }[];
+  sameAs?: string[];
+  knowsAbout?: string[];
+};
+
+/**
+ * One Person node per team member, keyed by `/team/<slug>#person`. The profile page declares it
+ * in full and every article that credits the person repeats it under `author`, so Google joins
+ * the byline, the profile and the `sameAs` profiles into a single entity for the person's name.
+ */
+export function personJsonLd(member: PersonSource) {
+  const url = absoluteUrl(`/team/${member.slug}`);
+  const knowsAbout = [...new Set([...(member.knowsAbout ?? []), ...member.worksOn.map((item) => item.label)])];
+  return {
+    "@type": "Person",
+    "@id": `${url}#person`,
+    name: member.name,
+    givenName: member.name.split(" ").slice(0, -1).join(" ") || member.name,
+    familyName: member.name.split(" ").slice(-1)[0],
+    jobTitle: member.role,
+    description: member.bioShort,
+    url,
+    ...(member.photo ? { image: /^https?:\/\//.test(member.photo) ? member.photo : absoluteUrl(member.photo) } : {}),
+    worksFor: { "@id": `${SITE_URL}/#organization` },
+    ...(knowsAbout.length ? { knowsAbout } : {}),
+    ...(member.sameAs?.length ? { sameAs: member.sameAs } : {}),
   };
 }

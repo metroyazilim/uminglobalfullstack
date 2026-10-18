@@ -12,10 +12,11 @@ import JsonLd from "@/components/JsonLd";
 import { CATEGORIES, SERVICES } from "@/components/services";
 import { SITE_URL, description } from "@/components/seo";
 
-// The catalogue is fixed at build time, so every valid URL is prerendered. Refusing unknown
-// params means a made-up slug returns the 404 page immediately instead of being rendered on
-// demand and cached as a real page.
-export const dynamicParams = false;
+// Every catalogue URL is prerendered; an unknown slug still ends in notFound() below. This
+// matches the team/office routes. With `dynamicParams = false` production served a cached 404
+// for every service page (seen 2026-10-19) while those routes were unaffected.
+export const dynamicParams = true;
+export const revalidate = 300;
 
 export function generateStaticParams() {
   return SERVICES.map((service) => ({ slug: service.slug }));

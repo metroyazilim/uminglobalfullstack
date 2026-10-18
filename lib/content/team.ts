@@ -15,6 +15,10 @@ import { TEAM_MEMBERS, type TeamMember } from "@/components/teamMembers";
  *      bundled list, which would resurrect members an admin deleted).
  * Any database error degrades to the bundled content and is logged.
  */
+function stringArray(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string" && item.trim() !== "") : [];
+}
+
 function toTeamMember(row: {
   slug: string;
   name: string;
@@ -24,6 +28,8 @@ function toTeamMember(row: {
   bioShort: string;
   bio: unknown;
   worksOn: unknown;
+  sameAs: unknown;
+  knowsAbout: unknown;
 }): TeamMember {
   return {
     slug: row.slug,
@@ -34,6 +40,8 @@ function toTeamMember(row: {
     bioShort: row.bioShort,
     bio: Array.isArray(row.bio) ? (row.bio as string[]) : [],
     worksOn: Array.isArray(row.worksOn) ? (row.worksOn as { label: string; href: string }[]) : [],
+    sameAs: stringArray(row.sameAs),
+    knowsAbout: stringArray(row.knowsAbout),
   };
 }
 
