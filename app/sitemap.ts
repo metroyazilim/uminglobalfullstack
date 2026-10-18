@@ -35,6 +35,7 @@ const STATIC_ROUTES: Entry[] = [
   { path: "/build-with-umin", priority: 0.7, changeFrequency: "monthly" },
   { path: "/insights", priority: 0.6, changeFrequency: "weekly" },
   { path: "/contact", priority: 0.7, changeFrequency: "yearly" },
+  { path: "/image-license", priority: 0.2, changeFrequency: "yearly" },
 ];
 
 // Articles and team members are published from the admin panel, and a build-time render runs

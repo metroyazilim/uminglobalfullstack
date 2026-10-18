@@ -141,6 +141,8 @@ export function personJsonLd(member: PersonSource) {
     creditText: "UMIN Global",
     creator: { "@type": "Organization", name: "UMIN Global", url: SITE_URL },
     copyrightNotice: `© UMIN Global. Photo of ${member.name}.`,
+    license: absoluteUrl("/image-license"),
+    acquireLicensePage: absoluteUrl("/contact"),
   }));
   const knowsAbout = [...new Set([...(member.knowsAbout ?? []), ...member.worksOn.map((item) => item.label)])];
   return {
