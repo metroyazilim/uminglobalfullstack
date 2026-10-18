@@ -86,9 +86,16 @@ function BodyBlock({ block }: { block: Block }) {
     case "image":
       return (
         <figure className="mt-8">
-          <div className="relative aspect-[16/9] overflow-hidden border border-divider">
-            <Image src={block.src} alt={block.alt} fill sizes="(max-width: 800px) 100vw, 800px" className="object-cover" unoptimized />
-          </div>
+          {/* Natural aspect ratio, never cropped: a portrait shows as the whole photo, not a 16:9 slice. */}
+          <Image
+            src={block.src}
+            alt={block.alt}
+            width={0}
+            height={0}
+            sizes="(max-width: 800px) 100vw, 800px"
+            className="h-auto max-h-[720px] w-auto max-w-full"
+            unoptimized
+          />
           {block.caption ? <figcaption className="mt-2 text-sm text-body">{block.caption}</figcaption> : null}
         </figure>
       );
