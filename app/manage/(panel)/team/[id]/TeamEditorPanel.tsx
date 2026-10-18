@@ -29,6 +29,7 @@ import {
 
 type ActionState = { error?: string; success?: string };
 type WorksOnItem = { label: string; href: string };
+type GalleryPhoto = { src: string; alt: string; caption?: string };
 type TeamMemberEditorData = {
   id: string;
   slug: string;
@@ -41,6 +42,8 @@ type TeamMemberEditorData = {
   worksOn: unknown;
   sameAs: unknown;
   knowsAbout: unknown;
+  alternateName: string | null;
+  gallery: unknown;
   status: string;
   version: number;
 };
@@ -55,6 +58,16 @@ function readLines(value: unknown): string {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string").join("\n") : "";
 }
 
+function readGallery(value: unknown): GalleryPhoto[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item) => {
+    if (!item || typeof item !== "object" || !("src" in item) || !("alt" in item)) return [];
+    const { src, alt } = item;
+    const caption = "caption" in item && typeof item.caption === "string" ? item.caption : "";
+    return typeof src === "string" && typeof alt === "string" ? [{ src, alt, caption }] : [];
+  });
+}
+
 function readWorksOn(value: unknown): WorksOnItem[] {
   if (!Array.isArray(value)) return [];
   return value.flatMap((item) => {
@@ -67,6 +80,9 @@ function readWorksOn(value: unknown): WorksOnItem[] {
 export function TeamEditorPanel({ member }: { member: TeamMemberEditorData }) {
   const [bio, setBio] = useState<string[]>(() => readBio(member.bio));
   const [worksOn, setWorksOn] = useState<WorksOnItem[]>(() => readWorksOn(member.worksOn));
+  const [gallery, setGallery] = useState<GalleryPhoto[]>(() => readGallery(member.gallery));
+  const updatePhoto = (index: number, patch: Partial<GalleryPhoto>) =>
+    setGallery((current) => current.map((photo, itemIndex) => (itemIndex === index ? { ...photo, ...patch } : photo)));
   const [lastAction, setLastAction] = useState<"draft" | "publish">("draft");
   const [isDeleting, startDeleteTransition] = useTransition();
   const [draftState, draftAction, isSaving] = useActionState(
@@ -115,6 +131,7 @@ export function TeamEditorPanel({ member }: { member: TeamMemberEditorData }) {
       <form action={draftAction} className="space-y-5">
         <input type="hidden" name="bio" value={JSON.stringify(bio)} />
         <input type="hidden" name="worksOn" value={JSON.stringify(worksOn)} />
+        <input type="hidden" name="gallery" value={JSON.stringify(gallery)} />
 
         <section className={cardPadded}>
           <div className="mb-5">
@@ -150,6 +167,11 @@ export function TeamEditorPanel({ member }: { member: TeamMemberEditorData }) {
             <label className={`${fieldLabel} md:col-span-2`}>
               Short bio
               <textarea name="bioShort" defaultValue={member.bioShort} rows={3} className={fieldTextarea} />
+            </label>
+            <label className={`${fieldLabel} md:col-span-2`}>
+              Also known as
+              <input name="alternateName" defaultValue={member.alternateName ?? ""} className={fieldInput} placeholder="Berat Arslan" />
+              <span className={fieldHint}>Another name people search for. Added to structured data as alternateName.</span>
             </label>
             <label className={fieldLabel}>
               Profile links (sameAs)
@@ -216,6 +238,51 @@ export function TeamEditorPanel({ member }: { member: TeamMemberEditorData }) {
             </div>
           ) : (
             <p className={helpText}>No biography paragraphs have been added yet.</p>
+          )}
+        </section>
+
+        <section className={cardPadded}>
+          <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 className={sectionTitle}>Photo gallery</h2>
+              <p className={`mt-1 ${helpText}`}>
+                Extra photos shown on the profile. Include the person&apos;s name in the alt text and caption so image search can match it.
+              </p>
+            </div>
+            <button type="button" className={secondaryButton} onClick={() => setGallery((current) => [...current, { src: "", alt: "", caption: "" }])}>
+              <Plus className="size-4" aria-hidden="true" />
+              Add photo
+            </button>
+          </div>
+
+          {gallery.length > 0 ? (
+            <div className="space-y-3">
+              {gallery.map((photo, index) => (
+                <div key={index} className="grid gap-3 rounded-[var(--radius-sm)] border border-brand-border p-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] md:items-start">
+                  <MediaField name={`gallery-${index}`} label={`Photo ${index + 1}`} value={photo.src} onChange={({ url }) => updatePhoto(index, { src: url })} />
+                  <div className="space-y-3">
+                    <label className={fieldLabel}>
+                      Alt text
+                      <input value={photo.alt} className={fieldInput} onChange={(event) => updatePhoto(index, { alt: event.target.value })} />
+                    </label>
+                    <label className={fieldLabel}>
+                      Caption
+                      <input value={photo.caption ?? ""} className={fieldInput} onChange={(event) => updatePhoto(index, { caption: event.target.value })} />
+                    </label>
+                  </div>
+                  <button
+                    type="button"
+                    className={`${secondaryButton} px-2.5`}
+                    aria-label={`${index + 1}. Remove photo`}
+                    onClick={() => setGallery((current) => current.filter((_, itemIndex) => itemIndex !== index))}
+                  >
+                    <Minus className="size-4" aria-hidden="true" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className={helpText}>No gallery photos have been added yet.</p>
           )}
         </section>
 

@@ -30,6 +30,8 @@ async function importTeam(): Promise<number> {
       worksOn: member.worksOn,
       sameAs: member.sameAs ?? [],
       knowsAbout: member.knowsAbout ?? [],
+      alternateName: member.alternateName ?? null,
+      gallery: member.gallery ?? [],
       sortOrder: index,
       status: "PUBLISHED" as const,
     };

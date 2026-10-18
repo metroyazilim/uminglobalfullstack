@@ -111,6 +111,9 @@ type PersonSource = {
   role: string;
   bioShort: string;
   photo: string;
+  photoAlt: string;
+  alternateName?: string;
+  gallery?: { src: string; alt: string; caption?: string }[];
   worksOn: { label: string }[];
   sameAs?: string[];
   knowsAbout?: string[];
@@ -123,6 +126,22 @@ type PersonSource = {
  */
 export function personJsonLd(member: PersonSource) {
   const url = absoluteUrl(`/team/${member.slug}`);
+  const toUrl = (src: string) => (/^https?:\/\//.test(src) ? src : absoluteUrl(src));
+  // Every photo as an ImageObject that names the person and credits UMIN Global - the metadata
+  // Google Images shows and uses to tie a picture to a name.
+  const images = [
+    ...(member.photo ? [{ src: member.photo, alt: member.photoAlt, caption: member.photoAlt }] : []),
+    ...(member.gallery ?? []),
+  ].map((photo) => ({
+    "@type": "ImageObject",
+    contentUrl: toUrl(photo.src),
+    url: toUrl(photo.src),
+    name: photo.alt || member.name,
+    caption: photo.caption || photo.alt || member.name,
+    creditText: "UMIN Global",
+    creator: { "@type": "Organization", name: "UMIN Global", url: SITE_URL },
+    copyrightNotice: `© UMIN Global. Photo of ${member.name}.`,
+  }));
   const knowsAbout = [...new Set([...(member.knowsAbout ?? []), ...member.worksOn.map((item) => item.label)])];
   return {
     "@type": "Person",
@@ -133,7 +152,8 @@ export function personJsonLd(member: PersonSource) {
     jobTitle: member.role,
     description: member.bioShort,
     url,
-    ...(member.photo ? { image: /^https?:\/\//.test(member.photo) ? member.photo : absoluteUrl(member.photo) } : {}),
+    ...(member.alternateName ? { alternateName: member.alternateName } : {}),
+    ...(images.length ? { image: images } : {}),
     worksFor: { "@id": `${SITE_URL}/#organization` },
     ...(knowsAbout.length ? { knowsAbout } : {}),
     ...(member.sameAs?.length ? { sameAs: member.sameAs } : {}),

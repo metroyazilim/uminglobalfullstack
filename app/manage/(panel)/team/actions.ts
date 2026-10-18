@@ -34,6 +34,18 @@ const teamMemberSchema = z.object({
   worksOn: z.array(worksOnItemSchema),
   sameAs: z.array(z.string().trim().url("Each profile link must be a full URL (https://…).")),
   knowsAbout: z.array(z.string().trim().min(1)),
+  alternateName: z
+    .string()
+    .trim()
+    .max(240)
+    .transform((value) => value || null),
+  gallery: z.array(
+    z.object({
+      src: z.string().trim().min(1, "Every photo needs an image.").refine(isAllowedImageRef, IMAGE_REF_MESSAGE),
+      alt: z.string().trim().min(1, "Every photo needs alt text."),
+      caption: z.string().trim().optional(),
+    }),
+  ),
 });
 
 /** One entry per line; blank lines are dropped. */
@@ -70,6 +82,8 @@ function parseTeamMemberForm(formData: FormData) {
     worksOn: parseJson(formText(formData, "worksOn")),
     sameAs: lines(formText(formData, "sameAs")),
     knowsAbout: lines(formText(formData, "knowsAbout")),
+    alternateName: formText(formData, "alternateName"),
+    gallery: parseJson(formText(formData, "gallery")),
   });
 }
 

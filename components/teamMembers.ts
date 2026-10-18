@@ -15,7 +15,18 @@ export interface TeamMember {
   sameAs?: string[];
   /** Expertise beyond the capability pages - emitted as Person `knowsAbout`. */
   knowsAbout?: string[];
+  /** Other names the person is searched by - emitted as Person `alternateName`. */
+  alternateName?: string;
+  /** More photos of the person, shown on the profile and listed in the image sitemap. */
+  gallery?: TeamPhoto[];
 }
+
+// A type alias, not an interface, so it stays assignable to Prisma's JSON input type.
+export type TeamPhoto = {
+  src: string;
+  alt: string;
+  caption?: string;
+};
 
 export const ANTHON: TeamMember = {
   slug: "anthon-ikram-umit",
@@ -43,8 +54,22 @@ export const BERAT: TeamMember = {
   slug: "muhammet-berat-arslan",
   name: "Muhammet Berat Arslan",
   role: "Chief Technology Officer",
-  photo: "/team/muhammet-berat-arslan.jpg",
-  photoAlt: "Muhammet Berat Arslan, Chief Technology Officer of UMIN Global",
+  photo: "/team/muhammet-berat-arslan.png",
+  photoAlt: "Muhammet Berat Arslan (Berat Arslan), Chief Technology Officer of UMIN Global",
+  alternateName: "Berat Arslan",
+  // File names, alt text and captions all carry the name: they are what image search indexes.
+  gallery: [
+    {
+      src: "/team/muhammet-berat-arslan-cto-umin-global.jpg",
+      alt: "Muhammet Berat Arslan, CTO of UMIN Global, in a black suit and white shirt",
+      caption: "Muhammet Berat Arslan, Chief Technology Officer of UMIN Global.",
+    },
+    {
+      src: "/team/berat-arslan-software-developer.jpg",
+      alt: "Berat Arslan, software developer and CTO of UMIN Global, wearing glasses and a navy blazer",
+      caption: "Berat Arslan (Muhammet Berat Arslan), software developer and technical SEO lead at UMIN Global.",
+    },
+  ],
   bioShort:
     "Software developer and CTO of UMIN Global. Leads architecture, technical SEO, custom admin systems and the AI systems UMIN puts into production.",
   bio: [

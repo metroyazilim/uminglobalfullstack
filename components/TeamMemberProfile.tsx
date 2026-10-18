@@ -65,7 +65,7 @@ export default function TeamMemberProfile({ member, articles = [] }: { member: T
 
           {articles.length > 0 ? (
             <>
-              <h2 className="t-h3 pt-8 text-ink">Articles by {member.name}</h2>
+              <h2 className="t-h3 pt-8 text-ink">{`Articles by ${member.name}`}</h2>
               <ul className="pt-2">
                 {articles.map((post) => (
                   <li key={post.slug}>
@@ -103,6 +103,24 @@ export default function TeamMemberProfile({ member, articles = [] }: { member: T
           </div>
         </Reveal>
       </div>
+
+      {member.gallery?.length ? (
+        <div className="pt-16">
+          <h2 className="t-h3 text-ink">{`Photos of ${member.name}`}</h2>
+          <div className="grid grid-cols-1 gap-6 pt-6 sm:grid-cols-2 lg:grid-cols-3">
+            {member.gallery.map((photo) => (
+              <figure key={photo.src}>
+                <div className="relative aspect-[4/5] w-full overflow-hidden rounded-card">
+                  {/* Served from its own named URL (not the optimizer) so image search indexes the
+                      descriptive file name alongside the alt text and caption. */}
+                  <Image src={photo.src} alt={photo.alt} fill sizes="(max-width: 640px) 100vw, 400px" className="object-cover" unoptimized />
+                </div>
+                {photo.caption ? <figcaption className="t-small pt-2 text-body">{photo.caption}</figcaption> : null}
+              </figure>
+            ))}
+          </div>
+        </div>
+      ) : null}
     </Section>
   );
 }

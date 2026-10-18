@@ -71,25 +71,29 @@ enum ContentStatus {
 /// transform layer. Not read by the public site today — see AGENTS note in
 /// app/manage/(panel)/team/actions.ts.
 model TeamMember {
-  id         String        @id @default(cuid())
-  slug       String        @unique
-  name       String
-  role       String
-  photo      String
-  photoAlt   String
-  bioShort   String
-  bio        Json
-  worksOn    Json
+  id            String        @id @default(cuid())
+  slug          String        @unique
+  name          String
+  role          String
+  photo         String
+  photoAlt      String
+  bioShort      String
+  bio           Json
+  worksOn       Json
   /// Profile URLs that identify the same person elsewhere (LinkedIn, GitHub …).
   /// Emitted as Person `sameAs` so search engines can join the entity.
-  sameAs     Json          @default("[]")
+  sameAs        Json          @default("[]")
   /// Topics emitted as Person `knowsAbout`, in addition to the worksOn labels.
-  knowsAbout Json          @default("[]")
-  sortOrder  Int           @default(0)
-  status     ContentStatus @default(DRAFT)
-  version    Int           @default(0)
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
+  knowsAbout    Json          @default("[]")
+  /// Other names the person is known by ("Berat Arslan"). Emitted as Person `alternateName`.
+  alternateName String?
+  /// Additional photos `[{ src, alt, caption }]`, shown on the profile and emitted as ImageObjects.
+  gallery       Json          @default("[]")
+  sortOrder     Int           @default(0)
+  status        ContentStatus @default(DRAFT)
+  version       Int           @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
   @@index([status, sortOrder])
 }

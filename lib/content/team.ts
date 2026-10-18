@@ -1,7 +1,7 @@
 import "server-only";
 import { prisma } from "@/lib/db";
 import { hasDatabase } from "@/lib/env";
-import { TEAM_MEMBERS, type TeamMember } from "@/components/teamMembers";
+import { TEAM_MEMBERS, type TeamMember, type TeamPhoto } from "@/components/teamMembers";
 
 /**
  * The public site's single source for team data.
@@ -19,6 +19,16 @@ function stringArray(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string" && item.trim() !== "") : [];
 }
 
+function photoArray(value: unknown): TeamPhoto[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item) => {
+    if (!item || typeof item !== "object") return [];
+    const { src, alt, caption } = item as Record<string, unknown>;
+    if (typeof src !== "string" || !src.trim() || typeof alt !== "string") return [];
+    return [{ src, alt, ...(typeof caption === "string" && caption.trim() ? { caption } : {}) }];
+  });
+}
+
 function toTeamMember(row: {
   slug: string;
   name: string;
@@ -30,6 +40,8 @@ function toTeamMember(row: {
   worksOn: unknown;
   sameAs: unknown;
   knowsAbout: unknown;
+  alternateName: string | null;
+  gallery: unknown;
 }): TeamMember {
   return {
     slug: row.slug,
@@ -42,6 +54,8 @@ function toTeamMember(row: {
     worksOn: Array.isArray(row.worksOn) ? (row.worksOn as { label: string; href: string }[]) : [],
     sameAs: stringArray(row.sameAs),
     knowsAbout: stringArray(row.knowsAbout),
+    ...(row.alternateName?.trim() ? { alternateName: row.alternateName.trim() } : {}),
+    gallery: photoArray(row.gallery),
   };
 }
 
