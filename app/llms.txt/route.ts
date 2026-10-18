@@ -5,7 +5,8 @@ import { getTeamMembers } from "@/lib/content/team";
 
 // llms.txt (https://llmstxt.org): a plain-markdown map of the site for AI search tools. Built from
 // the same catalogues as the sitemap, so it cannot list a page that does not exist.
-export const revalidate = 3600;
+// Same reason as the sitemap: built from live data on every request.
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   const [team, insights] = await Promise.all([getTeamMembers(), getInsights()]);

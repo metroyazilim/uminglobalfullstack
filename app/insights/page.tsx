@@ -30,7 +30,9 @@ const BASE_METADATA: Metadata = {
 export async function generateMetadata(): Promise<Metadata> {
   return applyPageSeoOverride(BASE_METADATA, "insights");
 }
-export const revalidate = 300;
+// Rendered per request: the image is built before the container runs its migrations, so a
+// build-time render can bake an empty list that the production server never replaced.
+export const dynamic = "force-dynamic";
 
 const BREADCRUMB_JSON_LD = breadcrumbJsonLd([{ name: "Insights", path: "/insights" }]);
 

@@ -37,9 +37,9 @@ const STATIC_ROUTES: Entry[] = [
   { path: "/contact", priority: 0.7, changeFrequency: "yearly" },
 ];
 
-// Articles and team members are published from the admin panel, so the sitemap is regenerated
-// every five minutes instead of being frozen at build time.
-export const revalidate = 300;
+// Articles and team members are published from the admin panel, and a build-time render runs
+// before the container's migrations - so the sitemap is generated per request from live data.
+export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [officeSlugs, team, insights] = await Promise.all([getOfficeSlugs(), getTeamMembers(), getInsights()]);
